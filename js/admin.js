@@ -68,8 +68,8 @@ async function renderOrders() {
 function renderDashboard() {
   const products = getProducts();
   setText('d-total', products.length);
-  setText('d-active', products.filter(p => p.status === 'active').length);
-  setText('d-out', products.filter(p => p.status === 'out').length);
+  setText('d-active', products.filter(p => p.status === 'active' && Number(p.stock) > 0).length);
+  setText('d-out', products.filter(p => p.status === 'out' || Number(p.stock) <= 0).length);
   setText('d-cats', new Set(products.map(p => p.cat)).size);
   const tbody = document.getElementById('recent-tbody');
   if (!tbody) return;
@@ -79,7 +79,7 @@ function renderDashboard() {
     nameCell.append(productVisual(product, 32), node('strong', '', product.name));
     const statusCell = document.createElement('td');
     statusCell.append(node('span', `status-pill status-${product.status}`, statusLabel(product.status)));
-    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), node('td', '', product.stock ?? 0), statusCell);
+    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), stockControls(product), statusCell);
     return row;
   }));
 }
@@ -104,14 +104,7 @@ function renderProductsTable(query = '') {
     nameCell.append(productVisual(product, 40), node('strong', '', product.name));
     const statusCell = document.createElement('td');
     statusCell.append(node('span', `status-pill status-${product.status}`, statusLabel(product.status)));
-    const stockCell = document.createElement('td');
-    const decrease = node('button', 'tbl-btn', '−'); decrease.type = 'button'; decrease.title = 'Stok azalt';
-    decrease.disabled = Number(product.stock) <= 0; decrease.addEventListener('click', () => adjustStock(product, -1));
-    const stockValue = node('strong', '', product.stock ?? 0);
-    Object.assign(stockValue.style, { display: 'inline-block', minWidth: '34px', textAlign: 'center' });
-    const increase = node('button', 'tbl-btn', '+'); increase.type = 'button'; increase.title = 'Stok artır';
-    increase.addEventListener('click', () => adjustStock(product, 1));
-    stockCell.append(decrease, stockValue, increase);
+    const stockCell = stockControls(product);
     const actions = document.createElement('td'); actions.style.whiteSpace = 'nowrap';
     const edit = node('button', 'tbl-btn', '✏️ Düzenle'); edit.type = 'button'; edit.addEventListener('click', () => editProduct(product.id));
     const remove = node('button', 'tbl-btn tbl-btn-del', '🗑 Sil'); remove.type = 'button'; remove.style.marginLeft = '4px'; remove.addEventListener('click', () => deleteProduct(product.id));
@@ -122,6 +115,18 @@ function renderProductsTable(query = '') {
 }
 
 function filterProducts() { renderProductsTable(document.getElementById('search-input')?.value || ''); }
+
+function stockControls(product) {
+  const cell = document.createElement('td');
+  const decrease = node('button', 'tbl-btn', '−'); decrease.type = 'button'; decrease.title = 'Stok azalt';
+  decrease.disabled = Number(product.stock) <= 0; decrease.addEventListener('click', () => adjustStock(product, -1));
+  const value = node('strong', '', product.stock ?? 0);
+  Object.assign(value.style, { display: 'inline-block', minWidth: '34px', textAlign: 'center' });
+  const increase = node('button', 'tbl-btn', '+'); increase.type = 'button'; increase.title = 'Stok artır';
+  increase.addEventListener('click', () => adjustStock(product, 1));
+  cell.append(decrease, value, increase);
+  return cell;
+}
 
 function openModal(product = null) {
   editingId = product?.id ?? null;
