@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yönetici Girişi — Filementor Studio</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f12;
+    }
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+      background: #1a1a1f;
+      border: 1px solid #2a2a30;
+      border-radius: 14px;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #fff;
+      margin: 0 0 1.5rem;
+      text-align: center;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #aaa;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #111;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    input:focus { outline: 2px solid #6366f1; }
+    button {
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      background: #6366f1;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    button:hover { background: #4f46e5; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error {
+      color: #f87171;
+      font-size: 0.85rem;
+      margin: -0.5rem 0 1rem;
+      min-height: 1em;
+    }
+  </style>
+  <script src="js/api-config.js?v=3"></script>
+</head>
+<body>
+  <div class="login-box">
+    <h1>🔒 Yönetici Girişi</h1>
+    <form id="login-form">
+      <label for="username">Kullanıcı Adı</label>
+      <input type="text" id="username" autocomplete="username" required />
+      <label for="password">Şifre</label>
+      <input type="password" id="password" autocomplete="current-password" required />
+      <p class="error" id="error-msg"></p>
+      <button type="submit" id="submit-btn">Giriş Yap</button>
+    </form>
+  </div>
+
+  <script>
+    // Backend adresini kendi API URL'inle değiştir (örn: https://filementor-api.onrender.com)
+    const API_BASE = window.FILEMENTOR_API_BASE || "";
+
+    const form = document.getElementById("login-form");
+    const errorMsg = document.getElementById("error-msg");
+    const submitBtn = document.getElementById("submit-btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorMsg.textContent = "";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Kontrol ediliyor...";
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include", // cookie gönderilsin/alınsın diye şart
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          window.location.href = "admin.html";
+        } else {
+          errorMsg.textContent = data.message || "Giriş başarısız.";
+        }
+      } catch (err) {
+        errorMsg.textContent = "Sunucuya bağlanılamadı.";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Giriş Yap";
+      }
+    });
+  </script>
+</body>
+</html>

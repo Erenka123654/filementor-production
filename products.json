@@ -1,0 +1,11 @@
+[
+  {"id":1,"name":"Dekoratif Vazo","cat":"Dekor","price":180,"status":"active","emoji":"🏺","isNew":true,"desc":"Zarif çizgilere sahip el yapımı dekoratif vazo.","image":null},
+  {"id":2,"name":"Masa Lambası Kapağı","cat":"Aydınlatma","price":240,"status":"active","emoji":"💡","isNew":false,"desc":"E27 duy uyumlu geometrik lamba kapağı.","image":null},
+  {"id":3,"name":"Saksı Seti (3 parça)","cat":"Dekor","price":320,"status":"active","emoji":"🪴","isNew":true,"desc":"Farklı boyutlarda iç mekan bitki saksısı seti.","image":null},
+  {"id":4,"name":"Özel Dinosaur Figura","cat":"Oyuncak","price":150,"status":"out","emoji":"🦕","isNew":false,"desc":"Detaylı boyalı T-Rex figürü, çocuklar için ideal.","image":null},
+  {"id":5,"name":"Dişli Mekanizma Seti","cat":"Hobi","price":95,"status":"active","emoji":"⚙️","isNew":false,"desc":"Birbirine geçen 5 farklı boyut dişli seti.","image":null},
+  {"id":6,"name":"El Yapımı Satranç Seti","cat":"Oyun","price":450,"status":"draft","emoji":"♟️","isNew":false,"desc":"32 parça özel tasarım satranç takımı.","image":null},
+  {"id":7,"name":"Duvar Organizeri","cat":"Ev","price":200,"status":"active","emoji":"🔑","isNew":true,"desc":"Anahtarlık, not kağıdı ve kalem tutucu.","image":null},
+  {"id":8,"name":"Uzay Roketi Figürü","cat":"Hobi","price":130,"status":"active","emoji":"🚀","isNew":false,"desc":"Detaylı boyalı roket maketi, masa dekoru.","image":null}
+]
+

@@ -1,0 +1,26 @@
+{
+  "name": "filementor-secure-backend",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Filementor güvenlik güçlendirilmiş API",
+  "main": "src/worker.js",
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "scripts": {
+    "build": "node scripts/build-static.js",
+    "start": "wrangler dev --local",
+    "dev": "wrangler dev --local",
+    "deploy": "npm run check && npm run audit && wrangler deploy",
+    "deploy:dry": "wrangler deploy --dry-run",
+    "db:local": "wrangler d1 migrations apply filementor-db --local",
+    "db:remote": "wrangler d1 migrations apply filementor-db --remote",
+    "audit": "npm audit --omit=dev",
+    "check": "node --check src/worker.js && node --check js/products.js && node --check js/store.js && node --check js/admin.js && node --check js/admin-guard.js && node --check js/payment.js && node scripts/security-check.js",
+    "types": "wrangler types ./src/worker-configuration.d.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "wrangler": "^4.110.0"
+  }
+}

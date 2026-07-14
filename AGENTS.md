@@ -1,0 +1,11 @@
+# Güvenlik kuralları
+- Secret değerleri yalnızca ortam değişkenlerinde tutulur; repoya yazılmaz.
+- Tüm dış girdiler sunucu tarafında şema ile doğrulanır.
+- Production CORS wildcard olamaz.
+- Her public endpoint rate limit kullanır.
+- Auth cookie httpOnly, secure ve sameSite olmalıdır.
+- Admin işlemlerinde kimlik ve yetki kontrolü zorunludur.
+- `innerHTML`, `eval`, dinamik script üretimi kullanılmaz.
+- Hata yanıtlarında stack trace veya servis detayları dönülmez.
+- Dosya/görsel yüklemelerinde tür ve boyut limiti uygulanır.
+- Her deploy öncesi `npm audit --omit=dev` ve `npm run check` çalıştırılır.

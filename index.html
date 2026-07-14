@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Filementor Studio — 3D Baskı Mağazası</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ══════════════ NAVBAR ══════════════ -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Filementor<strong>Studio</strong></span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link active">Mağaza</a>
+        <a href="#hakkimizda" class="nav-link">Hakkımızda</a>
+        <a href="#iletisim" class="nav-link">İletişim</a>
+        <a href="admin.html" class="nav-link admin-link">⚙ Yönetim</a>
+      </nav>
+      <button class="cart-btn" id="cart-btn" aria-label="Sepet">
+        🛒 <span class="cart-count" id="cart-count">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════════ HERO ══════════════ -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-badge">3D BASKI TEKNOLOJİSİ</div>
+      <h1 class="hero-title">Hayal Et,<br/>Biz Üretelim.</h1>
+      <p class="hero-sub">El yapımı 3D baskı ürünler. Hızlı teslimat, özel sipariş, sınırsız tasarım.</p>
+      <div class="hero-actions">
+        <a href="#urunler" class="btn btn-primary">Ürünleri Keşfet</a>
+        <a href="#iletisim" class="btn btn-ghost">Özel Sipariş</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-n">150+</span><span class="stat-l">Ürün</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-n">500+</span><span class="stat-l">Mutlu Müşteri</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-n">2 Gün</span><span class="stat-l">Teslimat</span></div>
+      </div>
+    </div>
+    <div class="hero-deco" aria-hidden="true">
+      <div class="deco-circle c1"></div>
+      <div class="deco-circle c2"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ ÜRÜNLER ══════════════ -->
+  <section class="products-section" id="urunler">
+    <div class="container">
+      <div class="section-head">
+        <h2 class="section-title">Ürünler</h2>
+        <div class="filter-row" id="filter-row"></div>
+      </div>
+      <div class="product-grid" id="product-grid"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ HAKKIMIZDA ══════════════ -->
+  <section class="about-section" id="hakkimizda">
+    <div class="container about-inner">
+      <div class="about-text">
+        <div class="section-badge">BİZ KİMİZ</div>
+        <h2 class="about-title">Tutkuyla üretiyoruz.</h2>
+        <p class="about-desc">Filementor Studio olarak yüksek kaliteli FDM ve reçine 3D yazıcılarımızla her türlü tasarımı hayata geçiriyoruz. Dekordan oyuncağa, hobi ürünlerinden endüstriyel prototiplere kadar geniş bir yelpazede üretim yapıyoruz.</p>
+        <ul class="about-list">
+          <li>✓ Yüksek çözünürlüklü baskı</li>
+          <li>✓ 10+ farklı renk ve malzeme</li>
+          <li>✓ Özel sipariş ve prototip üretimi</li>
+          <li>✓ Türkiye geneli kargo</li>
+        </ul>
+      </div>
+      <div class="about-visual" aria-hidden="true">
+        <div class="printer-card">
+          <div class="printer-emoji">🖨️</div>
+          <p>FDM 3D Yazıcı</p>
+          <span>0.2mm çözünürlük</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ İLETİŞİM ══════════════ -->
+  <section class="contact-section" id="iletisim">
+    <div class="container contact-inner">
+      <h2 class="contact-title">Özel Sipariş Ver</h2>
+      <p class="contact-sub">Aklındaki tasarımı bize anlat, sana özel üretelim.</p>
+      <form class="contact-form" onsubmit="handleContact(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ad Soyad</label>
+            <input class="form-input" name="name" type="text" maxlength="120" autocomplete="name" placeholder="Adınız Soyadınız" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-posta</label>
+            <input class="form-input" name="email" type="email" maxlength="254" autocomplete="email" placeholder="ornek@mail.com" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sipariş Detayı</label>
+          <textarea class="form-input form-textarea" name="detail" maxlength="2000" placeholder="Ürün hakkında detay verin..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Gönder</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="logo-text">Filementor<strong>Studio</strong></span>
+      <p class="footer-copy">© 2026 Filementor Studio. Tüm hakları saklıdır.</p>
+      <p class="footer-copy" style="margin-top:4px; font-size:11px; opacity:.5">Ödeme altyapısı: iyzico · SSL Güvenli</p>
+    </div>
+  </footer>
+
+  <!-- ══════════════ SEPET DRAWER ══════════════ -->
+  <div class="overlay" id="cart-overlay" onclick="toggleCart()"></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Sepet">
+    <div class="cart-header">
+      <h3>🛒 Sepetim</h3>
+      <button class="close-btn" onclick="toggleCart()" aria-label="Kapat">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <p class="cart-empty">Sepetiniz boş.</p>
+    </div>
+    <div class="cart-footer" id="cart-footer" style="display:none">
+      <div class="cart-total-row">
+        <span>Ara Toplam</span><span id="cart-subtotal">₺0</span>
+      </div>
+      <div class="cart-total-row">
+        <span>Kargo</span><span style="color:var(--brand);font-weight:600">Ücretsiz</span>
+      </div>
+      <div class="cart-total-row grand">
+        <span>Toplam</span><strong id="cart-total">₺0</strong>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="openCheckout()">💳 Ödemeye Geç</button>
+    </div>
+  </aside>
+
+  <!-- ══════════════ LİGHTBOX ══════════════ -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()" aria-modal="true" role="dialog">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Kapat">✕</button>
+    <div class="lightbox-inner" onclick="event.stopPropagation()">
+      <div class="lightbox-img-wrap" id="lb-img-wrap"></div>
+      <div class="lightbox-info">
+        <div class="lightbox-badges" id="lb-badges"></div>
+        <h2 class="lightbox-name" id="lb-name"></h2>
+        <p class="lightbox-cat" id="lb-cat"></p>
+        <p class="lightbox-desc" id="lb-desc"></p>
+        <div class="lightbox-footer">
+          <span class="lightbox-price" id="lb-price"></span>
+          <button class="btn btn-primary" id="lb-btn" onclick="addFromLightbox()">Sepete Ekle</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ ÖDEME MODALI ══════════════ -->
+  <div class="overlay" id="pay-overlay" onclick="closeCheckout()"></div>
+  <div class="pay-modal" id="pay-modal">
+    <div class="pay-header">
+      <h3>💳 Güvenli Ödeme</h3>
+      <button class="close-btn" onclick="closeCheckout()">✕</button>
+    </div>
+
+    <!-- Adım 1: Kişisel Bilgiler -->
+    <div class="pay-step" id="step-1">
+      <div class="step-indicator">
+        <span class="step active">1</span><span class="step-line"></span>
+        <span class="step">2</span><span class="step-line"></span>
+        <span class="step">3</span>
+      </div>
+      <h4 class="step-title">Teslimat Bilgileri</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Ad *</label>
+          <input class="form-input" id="pay-name" type="text" placeholder="Adınız" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Soyad *</label>
+          <input class="form-input" id="pay-surname" type="text" placeholder="Soyadınız" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-posta *</label>
+        <input class="form-input" id="pay-email" type="email" placeholder="ornek@mail.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefon *</label>
+        <input class="form-input" id="pay-phone" type="tel" placeholder="05XX XXX XX XX" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adres *</label>
+        <textarea class="form-input form-textarea" id="pay-address" placeholder="Teslimat adresi..." style="min-height:80px"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">İlçe *</label>
+          <input class="form-input" id="pay-district" type="text" placeholder="İlçe" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Şehir *</label>
+          <input class="form-input" id="pay-city" type="text" placeholder="Şehir" />
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="goStep(2)">Devam Et →</button>
+    </div>
+
+    <!-- Adım 2: Kart Bilgileri -->
+    <div class="pay-step" id="step-2" style="display:none">
+      <div class="step-indicator">
+        <span class="step done">✓</span><span class="step-line active"></span>
+        <span class="step active">2</span><span class="step-line"></span>
+        <span class="step">3</span>
+      </div>
+      <h4 class="step-title">Güvenli Ödeme Sağlayıcısı</h4>
+
+      <div class="card-preview" id="card-preview">
+        <div class="card-front">
+          <div class="card-chip">▬▬</div>
+          <div class="card-num" id="prev-num">•••• •••• •••• ••••</div>
+          <div class="card-bottom">
+            <div><div class="card-lbl">Kart Sahibi</div><div class="card-val" id="prev-holder">AD SOYAD</div></div>
+            <div><div class="card-lbl">Son Kullanma</div><div class="card-val" id="prev-exp">MM/YY</div></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="order-note">Kart bilgileriniz Filementor tarafından alınmaz. Ödeme sırasında iyzico'nun güvenli sayfasına yönlendirilirsiniz.</p>
+
+      <div class="installment-box">
+        <p class="form-label" style="margin-bottom:8px">Taksit Seçeneği</p>
+        <div class="installment-opts" id="installment-opts"></div>
+      </div>
+
+      <div class="secure-badges">
+        <span class="secure-badge">🔒 SSL</span>
+        <span class="secure-badge">🛡 iyzico</span>
+        <span class="secure-badge">💳 3D Secure</span>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:1rem">
+        <button class="btn btn-ghost" onclick="goStep(1)" style="flex:0 0 auto">← Geri</button>
+        <button class="btn btn-primary btn-full" onclick="goStep(3)">Siparişi Onayla →</button>
+      </div>
+    </div>
+
+    <!-- Adım 3: Onay -->
+    <div class="pay-step" id="step-3" style="display:none">
+      <div class="step-indicator">
+        <span class="step done">✓</span><span class="step-line active"></span>
+        <span class="step done">✓</span><span class="step-line active"></span>
+        <span class="step active">3</span>
+      </div>
+      <h4 class="step-title">Sipariş Özeti</h4>
+      <div class="order-summary" id="order-summary"></div>
+      <div class="order-total-box">
+        <span>Toplam Tutar</span>
+        <strong id="order-total-final">₺0</strong>
+      </div>
+      <p class="order-note">3D Secure doğrulaması için bankanızın sayfasına yönlendirileceksiniz.</p>
+      <button class="btn btn-primary btn-full btn-pay" id="pay-btn" onclick="processPayment()">
+        🔒 Güvenli Ödemeyi Tamamla
+      </button>
+    </div>
+
+    <!-- Adım 4: Başarı -->
+    <div class="pay-step" id="step-success" style="display:none">
+      <div class="success-anim">✅</div>
+      <h3 class="success-title">Ödeme Başarılı!</h3>
+      <p class="success-sub">Siparişiniz alındı. E-posta adresinize onay gönderildi.</p>
+      <p class="success-order" id="success-order-no"></p>
+      <button class="btn btn-primary btn-full" onclick="closeCheckout()">Alışverişe Devam Et</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ TOAST ══════════════ -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api-config.js?v=3"></script>
+  <script src="js/products.js?v=3"></script>
+  <script src="js/store.js"></script>
+  <script src="js/payment.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Copy to .dev.vars for local Worker development. Never commit .dev.vars.
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=replace-with-a-long-local-password
+SESSION_SECRET=replace-with-at-least-32-random-characters
+

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kurulum Rehberi — Filementor Studio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',sans-serif;background:#f4f6f4;color:#1a1a1a;padding:2rem 1rem}
+  .wrap{max-width:720px;margin:0 auto}
+  h1{font-size:1.75rem;font-weight:800;margin-bottom:.5rem}
+  .sub{color:#6b7280;margin-bottom:2.5rem;font-size:15px}
+  .step-card{background:#fff;border-radius:14px;padding:1.5rem;margin-bottom:1.25rem;border:1.5px solid rgba(0,0,0,.07)}
+  .step-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#085041;color:#fff;font-size:13px;font-weight:700;margin-bottom:1rem}
+  h2{font-size:16px;font-weight:700;margin-bottom:.75rem}
+  p{font-size:14px;color:#374151;line-height:1.6;margin-bottom:.75rem}
+  a{color:#1D9E75;font-weight:600}
+  pre{background:#0e1a14;color:#5DCAA5;border-radius:10px;padding:1rem;font-size:13px;overflow-x:auto;margin:.75rem 0;line-height:1.6}
+  code{background:#f0f0f0;padding:2px 6px;border-radius:4px;font-size:13px;color:#d85a30}
+  .note{background:#E1F5EE;border-radius:10px;padding:1rem;font-size:13px;color:#085041;border-left:4px solid #1D9E75;margin:.75rem 0}
+  .warn{background:#FAECE7;border-radius:10px;padding:1rem;font-size:13px;color:#7a2a10;border-left:4px solid #D85A30;margin:.75rem 0}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:.75rem 0}
+  th{text-align:left;padding:8px 12px;background:#f4f6f4;font-weight:600;border-bottom:1.5px solid rgba(0,0,0,.07)}
+  td{padding:8px 12px;border-bottom:1px solid rgba(0,0,0,.05);font-family:monospace}
+  .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .tag-ok{background:#E1F5EE;color:#085041}
+  .tag-fail{background:#FAECE7;color:#7a2a10}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚙️ Kurulum Rehberi</h1>
+  <p class="sub">Filementor Studio'yu iyzico ile canlıya almak için 4 adım.</p>
+
+  <!-- ADIM 1 -->
+  <div class="step-card">
+    <div class="step-num">1</div>
+    <h2>iyzico Sandbox Hesabı Aç</h2>
+    <p>Önce test ortamında dene, hazır olunca canlıya geç.</p>
+    <p>👉 <a href="https://sandbox-merchant.iyzipay.com" target="_blank">sandbox-merchant.iyzipay.com</a> adresine git ve üye ol.</p>
+    <p>Giriş yaptıktan sonra: <strong>Ayarlar → Merchant Bilgileri</strong> sayfasından <code>API Key</code> ve <code>Secret Key</code>'i kopyala.</p>
+    <div class="note">📌 Sandbox hesabı ücretsiz ve anlık açılır. Gerçek kart bilgisi gerekmez.</div>
+  </div>
+
+  <!-- ADIM 2 -->
+  <div class="step-card">
+    <div class="step-num">2</div>
+    <h2>Node.js Kur (bir kez)</h2>
+    <p>Bilgisayarında Node.js yoksa indir:</p>
+    <p>👉 <a href="https://nodejs.org" target="_blank">nodejs.org</a> → LTS sürümünü indir ve kur.</p>
+    <p>Kurulumu doğrulamak için terminali aç ve yaz:</p>
+    <pre>node --version
+npm --version</pre>
+    <p>İkisi de versiyon numarası gösteriyorsa hazırsın.</p>
+  </div>
+
+  <!-- ADIM 3 -->
+  <div class="step-card">
+    <div class="step-num">3</div>
+    <h2>Backend'i Başlat</h2>
+    <p><strong>a)</strong> ZIP'teki <code>filementor-backend</code> klasörünü masaüstüne çıkar.</p>
+    <p><strong>b)</strong> <code>.env</code> dosyasını bir metin editörüyle aç ve key'lerini gir:</p>
+    <pre>IYZICO_API_KEY=sandbox-xxxxxxxxxxxxxxxxx
+IYZICO_SECRET_KEY=sandbox-xxxxxxxxxxxxxxxxx
+IYZICO_SANDBOX=true
+FRONTEND_URL=*
+PORT=4000</pre>
+    <p><strong>c)</strong> Terminali aç, klasöre gir ve kur:</p>
+    <pre># Windows (Komut İstemi veya PowerShell)
+cd C:\Users\KULLANICI\Desktop\filementor_studio-backend
+npm install
+
+# Mac / Linux
+cd ~/Desktop/filementor_studio-backend
+npm install</pre>
+    <p><strong>d)</strong> Başlat:</p>
+    <pre>node server.js</pre>
+    <p>Şunu görmelisin:</p>
+    <pre style="color:#fff">✅ filementor Backend çalışıyor
+   http://localhost:4000
+   Mod: 🧪 SANDBOX</pre>
+    <div class="note">💡 Backend çalışırken terminali kapatma. Mağaza ile aynı anda açık olmalı.</div>
+  </div>
+
+  <!-- ADIM 4 -->
+  <div class="step-card">
+    <div class="step-num">4</div>
+    <h2>Mağazayı Aç ve Test Et</h2>
+    <p><code>filementor_studio/index.html</code> dosyasını tarayıcıda aç ve bir ürünü sepete ekle.</p>
+    <p>"Ödemeye Geç" → bilgileri doldur → kart bölümünde <strong>test kartlarından</strong> birini kullan:</p>
+    <table>
+      <tr><th>Kart No</th><th>Son Kullanma</th><th>CVV</th><th>Sonuç</th></tr>
+      <tr><td>5528790000000008</td><td>12/30</td><td>123</td><td><span class="tag tag-ok">✓ Başarılı</span></td></tr>
+      <tr><td>4054180000000007</td><td>12/30</td><td>123</td><td><span class="tag tag-ok">✓ Başarılı</span></td></tr>
+      <tr><td>5528790000000016</td><td>12/30</td><td>123</td><td><span class="tag tag-fail">✗ Reddedildi</span></td></tr>
+    </table>
+    <div class="warn">⚠️ Test kartlarıyla gerçek para çekilmez. Canlıya geçmeden önce tüm akışı sandbox'ta test et.</div>
+  </div>
+
+  <!-- CANLI -->
+  <div class="step-card">
+    <div class="step-num">5</div>
+    <h2>Canlıya Geçiş</h2>
+    <p>Her şey sandbox'ta çalışınca:</p>
+    <p>1. <a href="https://merchant.iyzipay.com" target="_blank">merchant.iyzipay.com</a>'dan canlı hesap başvurusu yap (firma belgesi gerekir).</p>
+    <p>2. Onaylandıktan sonra canlı API key'lerini al.</p>
+    <p>3. <code>.env</code> dosyasını güncelle:</p>
+    <pre>IYZICO_API_KEY=CANLI_API_KEY
+IYZICO_SECRET_KEY=CANLI_SECRET_KEY
+IYZICO_SANDBOX=false</pre>
+    <p>4. <code>node server.js</code> → artık gerçek ödeme alabilirsin!</p>
+    <div class="note">📦 Sunucuya yüklemek istersen Railway.app veya Render.com'da ücretsiz Node.js hosting var.</div>
+  </div>
+</div>
+</body>
+</html>
