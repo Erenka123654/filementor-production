@@ -471,7 +471,7 @@ export default {
           frontendUrl.searchParams.set("payment", "failed");
           return Response.redirect(frontendUrl.toString(), 303);
         }
-        const order = await env.DB.prepare("SELECT id, amount_cents, status FROM orders WHERE iyzico_token = ?").bind(token).first();
+        const order = await env.DB.prepare("SELECT id, amount_cents, status, items_json FROM orders WHERE iyzico_token = ?").bind(token).first();
         if (!order) {
           frontendUrl.searchParams.set("payment", "failed");
           return Response.redirect(frontendUrl.toString(), 303);
@@ -484,10 +484,31 @@ export default {
         const verified = result.status === "success" && result.paymentStatus === "SUCCESS" &&
           result.conversationId === order.id && result.basketId === order.id && result.token === token &&
           paidCents === expectedCents && await validIyzicoResponseSignature(result, env.IYZICO_SECRET_KEY);
-        await env.DB.prepare(`
-          UPDATE orders SET status = ?, iyzico_payment_id = ?, updated_at = CURRENT_TIMESTAMP
-          WHERE id = ? AND status = 'pending'
-        `).bind(verified ? "paid" : "failed", verified ? String(result.paymentId || "") : null, order.id).run();
+        if (verified) {
+          let items;
+          try { items = JSON.parse(String(order.items_json)); } catch { items = []; }
+          if (!Array.isArray(items) || items.some(item => !/^[a-zA-Z0-9-]+$/.test(String(item.id || "")) || !Number.isInteger(item.quantity) || item.quantity < 1)) {
+            return jsonResponse(request, { error: "Sipariş kaydı doğrulanamadı." }, 500);
+          }
+          const statements = items.map(item => env.DB.prepare(`
+            UPDATE products SET
+              stock = MAX(stock - ?, 0),
+              status = CASE WHEN stock - ? <= 0 THEN 'out' ELSE status END,
+              active = CASE WHEN stock - ? <= 0 THEN 0 ELSE active END,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND EXISTS (SELECT 1 FROM orders WHERE id = ? AND status = 'pending')
+          `).bind(item.quantity, item.quantity, item.quantity, item.id, order.id));
+          statements.push(env.DB.prepare(`
+            UPDATE orders SET status = 'paid', iyzico_payment_id = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND status = 'pending'
+          `).bind(String(result.paymentId || ""), order.id));
+          await env.DB.batch(statements);
+        } else {
+          await env.DB.prepare(`
+            UPDATE orders SET status = 'failed', updated_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND status = 'pending'
+          `).bind(order.id).run();
+        }
         frontendUrl.searchParams.set("payment", verified ? "success" : "failed");
         frontendUrl.searchParams.set("order", order.id);
         return Response.redirect(frontendUrl.toString(), 303);
@@ -555,7 +576,8 @@ export default {
         ).trim();
         const stock = Number(product.stock ?? 0);
         const category = String(product.category ?? product.cat ?? "").trim();
-        const status = ["active", "out", "draft"].includes(product.status) ? product.status : "active";
+        const requestedStatus = ["active", "out", "draft"].includes(product.status) ? product.status : "active";
+        const status = stock === 0 && requestedStatus === "active" ? "out" : requestedStatus;
         const isNew = product.isNew === true ? 1 : 0;
         const emoji = String(product.emoji ?? "").slice(0, 8);
 
@@ -618,7 +640,9 @@ export default {
 
         const description = String(product.description ?? product.desc ?? "").trim();
         const imageUrl = String(product.imageUrl ?? product.image_url ?? product.image ?? "").trim();
-        const status = ["active", "out", "draft"].includes(product.status) ? product.status : "active";
+        const stock = Number(product.stock ?? 0);
+        const requestedStatus = ["active", "out", "draft"].includes(product.status) ? product.status : "active";
+        const status = stock === 0 && requestedStatus === "active" ? "out" : requestedStatus;
         const result = await env.DB.prepare(`
           UPDATE products SET
             name = ?, description = ?, price = ?, image_url = ?, stock = ?,
@@ -627,7 +651,7 @@ export default {
           WHERE id = ?
         `).bind(
           String(product.name).trim(), description, Number(product.price), imageUrl,
-          Number(product.stock ?? 0), status === "active" ? 1 : 0,
+          stock, status === "active" ? 1 : 0,
           String(product.category ?? product.cat ?? "").trim(), status,
           product.isNew === true ? 1 : 0, String(product.emoji ?? "").slice(0, 8),
           productMatch[1]

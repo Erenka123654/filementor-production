@@ -79,7 +79,7 @@ function renderDashboard() {
     nameCell.append(productVisual(product, 32), node('strong', '', product.name));
     const statusCell = document.createElement('td');
     statusCell.append(node('span', `status-pill status-${product.status}`, statusLabel(product.status)));
-    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), statusCell);
+    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), node('td', '', product.stock ?? 0), statusCell);
     return row;
   }));
 }
@@ -93,7 +93,7 @@ function renderProductsTable(query = '') {
   if (!tbody) return;
   if (!products.length) {
     const row = document.createElement('tr');
-    const cell = node('td', '', 'Ürün bulunamadı.'); cell.colSpan = 5;
+    const cell = node('td', '', 'Ürün bulunamadı.'); cell.colSpan = 6;
     Object.assign(cell.style, { textAlign: 'center', color: '#aaa', padding: '2rem' });
     row.append(cell); tbody.replaceChildren(row); return;
   }
@@ -108,7 +108,7 @@ function renderProductsTable(query = '') {
     const edit = node('button', 'tbl-btn', '✏️ Düzenle'); edit.type = 'button'; edit.addEventListener('click', () => editProduct(product.id));
     const remove = node('button', 'tbl-btn tbl-btn-del', '🗑 Sil'); remove.type = 'button'; remove.style.marginLeft = '4px'; remove.addEventListener('click', () => deleteProduct(product.id));
     actions.append(edit, remove);
-    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), statusCell, actions);
+    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), node('td', '', product.stock ?? 0), statusCell, actions);
     return row;
   }));
 }
