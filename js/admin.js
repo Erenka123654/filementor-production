@@ -35,6 +35,34 @@ function showSection(name) {
   currentSection = name;
   if (name === 'dashboard') renderDashboard();
   if (name === 'products') renderProductsTable();
+  if (name === 'orders') renderOrders();
+}
+
+async function renderOrders() {
+  const tbody = document.getElementById('orders-tbody'); if (!tbody) return;
+  tbody.replaceChildren(node('tr', '', ''));
+  try {
+    const response = await fetch(`${window.FILEMENTOR_API_BASE || ''}/api/admin/orders`, { credentials: 'include' });
+    if (!response.ok) throw new Error('Siparişler alınamadı.');
+    const { orders = [] } = await response.json();
+    if (!orders.length) {
+      const row = document.createElement('tr'); const cell = node('td', '', 'Henüz sipariş yok.'); cell.colSpan = 5; row.append(cell); tbody.replaceChildren(row); return;
+    }
+    tbody.replaceChildren(...orders.map(order => {
+      const row = document.createElement('tr');
+      const status = { paid: 'Ödendi', pending: 'Bekliyor', failed: 'Başarısız' }[order.status] || order.status;
+      row.append(
+        node('td', '', String(order.id).slice(0, 8)),
+        node('td', '', `${order.customerName} (${order.customerEmail})`),
+        node('td', '', `₺${(Number(order.amountCents) / 100).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`),
+        node('td', '', status),
+        node('td', '', new Date(order.createdAt).toLocaleString('tr-TR'))
+      );
+      return row;
+    }));
+  } catch {
+    const row = document.createElement('tr'); const cell = node('td', '', 'Siparişler yüklenemedi.'); cell.colSpan = 5; row.append(cell); tbody.replaceChildren(row);
+  }
 }
 
 function renderDashboard() {
@@ -92,6 +120,7 @@ function openModal(product = null) {
   pendingImage = product?.image || null;
   setText('modal-title', product ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle');
   setValue('f-name', product?.name || ''); setValue('f-price', product?.price || '');
+  setValue('f-stock', product?.stock ?? 1);
   setValue('f-cat', product?.cat || ''); setValue('f-desc', product?.desc || '');
   setValue('f-status', product?.status || 'active'); setValue('f-new', String(Boolean(product?.isNew)));
   buildEmojiGrid(product?.emoji || '📦'); renderImagePreview();
@@ -153,12 +182,13 @@ function removeImage() { pendingImage = null; renderImagePreview(); }
 async function saveProduct() {
   const name = document.getElementById('f-name')?.value.trim();
   const price = Number(document.getElementById('f-price')?.value);
+  const stock = Number(document.getElementById('f-stock')?.value);
   const cat = document.getElementById('f-cat')?.value.trim();
   const desc = document.getElementById('f-desc')?.value.trim() || '';
   const status = document.getElementById('f-status')?.value;
   const isNew = document.getElementById('f-new')?.value === 'true';
-  if (!name || !Number.isFinite(price) || price < 0 || !cat) { alert('Zorunlu alanları geçerli değerlerle doldurun.'); return; }
-  const payload = { name, price, cat, desc, status, isNew, emoji: selectedEmoji, image: pendingImage };
+  if (!name || !Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0 || !cat) { alert('Zorunlu alanları geçerli değerlerle doldurun.'); return; }
+  const payload = { name, price, stock, cat, desc, status, isNew, emoji: selectedEmoji, image: pendingImage };
   const wasEditing = editingId !== null;
   try {
     const result = wasEditing ? await updateProductOnServer(editingId, payload) : await createProduct(payload);

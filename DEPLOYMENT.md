@@ -41,9 +41,14 @@ Değerleri komut satırı argümanı olarak vermeyin; aşağıdaki komutlar güv
 npx wrangler secret put ADMIN_USERNAME
 npx wrangler secret put ADMIN_PASSWORD
 npx wrangler secret put SESSION_SECRET
+npx wrangler secret put IYZICO_API_KEY
+npx wrangler secret put IYZICO_SECRET_KEY
+npx wrangler secret put IYZICO_ENVIRONMENT
 ```
 
 `SESSION_SECRET` en az 32 rastgele karakter olmalıdır. Admin parolası benzersiz ve uzun olmalıdır.
+
+İlk entegrasyonda `IYZICO_ENVIRONMENT` değerini `sandbox` girin ve iyzico sandbox anahtarlarını kullanın. Sandbox ödemesi uçtan uca doğrulandıktan sonra production anahtarlarını yükleyip değeri `production` yapın. Anahtarları GitHub veya Cloudflare build değişkenlerinde düz metin olarak saklamayın.
 
 ## 5. Deploy öncesi doğrulama
 
@@ -93,6 +98,7 @@ Ardından gizli tarayıcı penceresinde:
 3. Admin girişi yapıp ürün ekleme, düzenleme ve silmeyi deneyin.
 4. Taslak ürünün mağazada görünmediğini, admin panelinde göründüğünü doğrulayın.
 5. Hatalı login denemelerinde 429 rate-limit yanıtını kontrol edin.
+6. Sandbox ürünüyle ödeme başlatın; iyzico dönüşünden sonra admin panelindeki Siparişler bölümünde durumun `Ödendi` olduğunu doğrulayın.
 
 ## 9. İzleme ve geri dönüş
 

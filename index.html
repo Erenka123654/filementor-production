@@ -184,34 +184,43 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Ad *</label>
-          <input class="form-input" id="pay-name" type="text" placeholder="Adınız" />
+          <input class="form-input" id="pay-name" type="text" maxlength="100" autocomplete="given-name" placeholder="Adınız" />
         </div>
         <div class="form-group">
           <label class="form-label">Soyad *</label>
-          <input class="form-input" id="pay-surname" type="text" placeholder="Soyadınız" />
+          <input class="form-input" id="pay-surname" type="text" maxlength="100" autocomplete="family-name" placeholder="Soyadınız" />
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">E-posta *</label>
-        <input class="form-input" id="pay-email" type="email" placeholder="ornek@mail.com" />
+        <input class="form-input" id="pay-email" type="email" maxlength="254" autocomplete="email" placeholder="ornek@mail.com" />
       </div>
       <div class="form-group">
         <label class="form-label">Telefon *</label>
-        <input class="form-input" id="pay-phone" type="tel" placeholder="05XX XXX XX XX" />
+        <input class="form-input" id="pay-phone" type="tel" maxlength="20" autocomplete="tel" placeholder="+90 5XX XXX XX XX" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">T.C. Kimlik Numarası *</label>
+        <input class="form-input" id="pay-identity" type="text" inputmode="numeric" minlength="11" maxlength="11" autocomplete="off" placeholder="11 haneli" />
+        <small class="form-hint">Yalnızca ödeme sağlayıcısına iletilir, Filementor veritabanında saklanmaz.</small>
       </div>
       <div class="form-group">
         <label class="form-label">Adres *</label>
-        <textarea class="form-input form-textarea" id="pay-address" placeholder="Teslimat adresi..." style="min-height:80px"></textarea>
+        <textarea class="form-input form-textarea" id="pay-address" maxlength="300" autocomplete="street-address" placeholder="Teslimat adresi..." style="min-height:80px"></textarea>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">İlçe *</label>
-          <input class="form-input" id="pay-district" type="text" placeholder="İlçe" />
+          <input class="form-input" id="pay-district" type="text" maxlength="100" autocomplete="address-level2" placeholder="İlçe" />
         </div>
         <div class="form-group">
           <label class="form-label">Şehir *</label>
-          <input class="form-input" id="pay-city" type="text" placeholder="Şehir" />
+          <input class="form-input" id="pay-city" type="text" maxlength="100" autocomplete="address-level1" placeholder="Şehir" />
         </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Posta Kodu *</label>
+        <input class="form-input" id="pay-zip" type="text" inputmode="numeric" minlength="5" maxlength="5" autocomplete="postal-code" placeholder="34000" />
       </div>
       <button class="btn btn-primary btn-full" onclick="goStep(2)">Devam Et →</button>
     </div>

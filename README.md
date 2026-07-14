@@ -51,7 +51,9 @@ Her production deploy öncesinde ilk iki komut zorunludur. Ayrıntılı canlıya
 
 ## Ödeme
 
-Ham kart verisi bu repo veya Worker üzerinden işlenmez. `js/api-config.js` içindeki `FILEMENTOR_PAYMENT_URL`, iyzico gibi sağlayıcının HTTPS hosted-checkout bağlantısına ayarlanmadıkça online ödeme bilinçli olarak kapalıdır. Production kart entegrasyonunda sağlayıcının hosted ödeme sayfası kullanılmalıdır.
+Ödeme, iyzico Checkout Form hosted sayfası üzerinden yapılır; ham kart verisi Filementor frontend'ine, Worker'a veya D1 veritabanına gelmez. Worker sepet tutarını istemciden kabul etmez, aktif ürün fiyatlarını D1'dan yeniden hesaplar. Callback sonrasında iyzico sonucu ve HMAC response signature doğrulanmadan sipariş `paid` durumuna geçmez.
+
+Yerelde sandbox anahtarlarını yalnızca `.dev.vars` içinde `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` ve `IYZICO_ENVIRONMENT=sandbox` olarak tanımlayın. Production anahtarları Cloudflare secret olarak saklanmalıdır.
 
 İletişim formu için `js/api-config.js` içindeki `FILEMENTOR_CONTACT_EMAIL` izlenen bir e-posta adresine ayarlanmalıdır. Değer boşken arayüz mesaj gönderildiğini iddia etmez ve kullanıcıyı açıkça bilgilendirir.
 
