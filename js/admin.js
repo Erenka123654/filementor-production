@@ -168,7 +168,7 @@ function renderImagePreview() {
     wrap.replaceChildren(box, hint, label);
   } else {
     const label = node('label', 'img-drop-zone'); label.htmlFor = 'f-image'; label.id = 'drop-zone';
-    label.append(node('span', 'drop-icon', '🖼️'), node('span', 'drop-text', 'JPG, PNG veya WEBP yükle'), node('span', 'drop-sub', 'Tıkla veya sürükle bırak • Maks 600 KB'));
+    label.append(node('span', 'drop-icon', '🖼️'), node('span', 'drop-text', 'JPG, PNG veya WEBP yükle'), node('span', 'drop-sub', 'Tıkla veya sürükle bırak • Maks 50 MB • Otomatik sıkıştırılır'));
     wrap.replaceChildren(label); setupDropZone();
   }
 }
@@ -182,12 +182,12 @@ function setupDropZone() {
 
 async function handleImageFile(file) {
   if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { alert('Yalnızca JPG, PNG veya WEBP seçebilirsiniz.'); return; }
-  if (file.size > 600 * 1024) { alert('Dosya boyutu 600 KB’dan büyük olamaz.'); return; }
+  if (file.size > 50 * 1024 * 1024) { alert('Kaynak görsel 50 MB’dan büyük olamaz.'); return; }
   try {
     const encoded = await fileToBase64(file);
     if (encoded.length > 700000) throw new Error('Görsel çok büyük.');
     pendingImage = encoded; renderImagePreview();
-  } catch { alert('Resim işlenemedi. Daha küçük bir dosya deneyin.'); }
+  } catch { alert('Resim işlenemedi veya güvenli boyuta sıkıştırılamadı. Başka bir görsel deneyin.'); }
 }
 
 function removeImage() { pendingImage = null; renderImagePreview(); }

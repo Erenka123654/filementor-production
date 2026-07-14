@@ -71,28 +71,36 @@ async function deleteProductOnServer(id) {
   return res.ok ? data : { success: false, message: data.message || data.error || 'Ürün silinemedi.' };
 }
 
-/* Resmi base64'e çeviren yardımcı — max 800px, JPEG kalitesi 0.82 */
+/* 50 MB'a kadar kaynak görseli D1 için güvenli boyuta küçültür ve sıkıştırır. */
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
-    const MAX = 800;
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = e => {
-      const img = new Image();
-      img.onerror = reject;
-      img.onload = () => {
-        let w = img.width, h = img.height;
-        if (w > MAX || h > MAX) {
-          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-          else        { w = Math.round(w * MAX / h); h = MAX; }
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Görsel açılamadı.')); };
+    img.onload = () => {
+      try {
+        let maxDimension = 1200;
+        let quality = 0.86;
+        let encoded = '';
+        for (let attempt = 0; attempt < 8; attempt += 1) {
+          const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
+          const width = Math.max(1, Math.round(img.width * scale));
+          const height = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          const context = canvas.getContext('2d', { alpha: false });
+          if (!context) throw new Error('Görsel işleyici kullanılamıyor.');
+          context.fillStyle = '#ffffff'; context.fillRect(0, 0, width, height);
+          context.drawImage(img, 0, 0, width, height);
+          encoded = canvas.toDataURL('image/jpeg', quality);
+          if (encoded.length <= 680000) { resolve(encoded); return; }
+          quality = Math.max(0.5, quality - 0.08);
+          maxDimension = Math.max(600, Math.round(maxDimension * 0.82));
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', 0.82));
-      };
-      img.src = e.target.result;
+        reject(new Error('Görsel güvenli boyuta indirilemedi.'));
+      } catch (error) { reject(error); }
+      finally { URL.revokeObjectURL(objectUrl); }
     };
-    reader.readAsDataURL(file);
+    img.src = objectUrl;
   });
 }
