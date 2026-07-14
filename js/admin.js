@@ -104,11 +104,19 @@ function renderProductsTable(query = '') {
     nameCell.append(productVisual(product, 40), node('strong', '', product.name));
     const statusCell = document.createElement('td');
     statusCell.append(node('span', `status-pill status-${product.status}`, statusLabel(product.status)));
+    const stockCell = document.createElement('td');
+    const decrease = node('button', 'tbl-btn', '−'); decrease.type = 'button'; decrease.title = 'Stok azalt';
+    decrease.disabled = Number(product.stock) <= 0; decrease.addEventListener('click', () => adjustStock(product, -1));
+    const stockValue = node('strong', '', product.stock ?? 0);
+    Object.assign(stockValue.style, { display: 'inline-block', minWidth: '34px', textAlign: 'center' });
+    const increase = node('button', 'tbl-btn', '+'); increase.type = 'button'; increase.title = 'Stok artır';
+    increase.addEventListener('click', () => adjustStock(product, 1));
+    stockCell.append(decrease, stockValue, increase);
     const actions = document.createElement('td'); actions.style.whiteSpace = 'nowrap';
     const edit = node('button', 'tbl-btn', '✏️ Düzenle'); edit.type = 'button'; edit.addEventListener('click', () => editProduct(product.id));
     const remove = node('button', 'tbl-btn tbl-btn-del', '🗑 Sil'); remove.type = 'button'; remove.style.marginLeft = '4px'; remove.addEventListener('click', () => deleteProduct(product.id));
     actions.append(edit, remove);
-    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), node('td', '', product.stock ?? 0), statusCell, actions);
+    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), stockCell, statusCell, actions);
     return row;
   }));
 }
@@ -199,6 +207,23 @@ async function saveProduct() {
 }
 
 function editProduct(id) { const product = getProducts().find(item => String(item.id) === String(id)); if (product) openModal(product); }
+async function adjustStock(product, delta) {
+  const currentStock = Number(product.stock) || 0;
+  const stock = Math.max(0, currentStock + delta);
+  if (!Number.isInteger(stock) || stock > 1000000 || stock === currentStock) return;
+  const status = stock === 0 ? 'out' : (product.status === 'draft' ? 'draft' : 'active');
+  const payload = {
+    name: product.name, price: Number(product.price), stock, cat: product.cat,
+    desc: product.desc || '', status, isNew: Boolean(product.isNew),
+    emoji: product.emoji || '📦', image: product.image || null
+  };
+  try {
+    const result = await updateProductOnServer(product.id, payload);
+    if (!result.success) throw new Error(result.message || 'Stok güncellenemedi.');
+    await fetchProducts(); renderProductsTable(document.getElementById('search-input')?.value || ''); renderDashboard();
+    showToast(`Stok ${stock} olarak güncellendi.`);
+  } catch (error) { console.error(error); alert(error.message || 'Stok güncellenemedi.'); }
+}
 async function deleteProduct(id) {
   if (!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) return;
   try { const result = await deleteProductOnServer(id); if (!result.success) throw new Error(result.message); await fetchProducts(); renderProductsTable(); renderDashboard(); showToast('Ürün silindi.'); }

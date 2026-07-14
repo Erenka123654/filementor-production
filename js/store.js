@@ -69,11 +69,19 @@ function addFromLightbox() { if (lightboxProductId !== null) { addToCart(lightbo
 
 function addToCart(id) {
   const product = getProducts().find(item => sameId(item.id, id)); if (!product || product.status === 'out') return;
-  const existing = cart.find(item => sameId(item.id, id)); if (existing) existing.qty += 1; else cart.push({ ...product, qty: 1 });
+  const existing = cart.find(item => sameId(item.id, id));
+  const stock = Number(product.stock) || 0;
+  if ((existing?.qty || 0) >= stock) { showToast(`“${product.name}” için stok sınırına ulaştınız.`); return; }
+  if (existing) existing.qty += 1; else cart.push({ ...product, qty: 1 });
   updateCartUI(); showToast(`“${product.name}” sepete eklendi 🛒`);
 }
 function removeFromCart(id) { cart = cart.filter(item => !sameId(item.id, id)); updateCartUI(); }
-function changeQty(id, delta) { const item = cart.find(entry => sameId(entry.id, id)); if (!item) return; item.qty += delta; if (item.qty <= 0) removeFromCart(id); else updateCartUI(); }
+function changeQty(id, delta) {
+  const item = cart.find(entry => sameId(entry.id, id)); if (!item) return;
+  const product = getProducts().find(entry => sameId(entry.id, id));
+  if (delta > 0 && item.qty >= (Number(product?.stock) || 0)) { showToast(`“${item.name}” için stok sınırına ulaştınız.`); return; }
+  item.qty += delta; if (item.qty <= 0) removeFromCart(id); else updateCartUI();
+}
 
 function updateCartUI() {
   const count = document.getElementById('cart-count'); if (count) count.textContent = String(cart.reduce((sum, item) => sum + item.qty, 0));
