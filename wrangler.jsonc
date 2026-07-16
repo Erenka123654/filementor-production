@@ -2,12 +2,19 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "filementor-production",
   "main": "src/worker.js",
-  "compatibility_date": "2026-07-14",
+  "compatibility_date": "2026-07-16",
   "compatibility_flags": ["nodejs_compat"],
   "keep_vars": true,
   "vars": {
-    "IYZICO_ENVIRONMENT": "sandbox"
+    "IYZICO_ENVIRONMENT": "sandbox",
+    "CONTACT_FROM_EMAIL": "noreply@filementorstudio.net",
+    "CONTACT_TO_EMAIL": "info@filementorstudio.net"
   },
+  "send_email": [
+    {
+      "name": "EMAIL"
+    }
+  ],
   "secrets": {
     "required": [
       "ADMIN_USERNAME",

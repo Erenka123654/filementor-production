@@ -4,4 +4,3 @@ window.FILEMENTOR_API_BASE = ['localhost', '127.0.0.1'].includes(window.location
   ? 'http://localhost:8787'
   : 'https://api.filementorstudio.net';
 // Optional public contact mailbox. Leave blank until a monitored mailbox exists.
-window.FILEMENTOR_CONTACT_EMAIL = 'info@filementorstudio.net ';

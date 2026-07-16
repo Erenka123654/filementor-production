@@ -55,7 +55,7 @@ Her production deploy öncesinde ilk iki komut zorunludur. Ayrıntılı canlıya
 
 Yerelde sandbox anahtarlarını yalnızca `.dev.vars` içinde `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` ve `IYZICO_ENVIRONMENT=sandbox` olarak tanımlayın. Production anahtarları Cloudflare secret olarak saklanmalıdır.
 
-İletişim formu için `js/api-config.js` içindeki `FILEMENTOR_CONTACT_EMAIL` izlenen bir e-posta adresine ayarlanmalıdır. Değer boşken arayüz mesaj gönderildiğini iddia etmez ve kullanıcıyı açıkça bilgilendirir.
+İletişim formu `POST /api/contact` üzerinden Cloudflare Email Sending binding'ini kullanır. Canlıya almadan önce `filementorstudio.net` alanını Cloudflare Email Sending'e dahil edin ve `wrangler.jsonc` içindeki `EMAIL` binding'inin oluştuğunu doğrulayın. Gönderen ve alıcı adresleri `CONTACT_FROM_EMAIL` ile `CONTACT_TO_EMAIL` değişkenlerinden okunur; e-posta API anahtarı kaynak kodda tutulmaz.
 
 ## Güvenlik notu
 

@@ -104,20 +104,30 @@ function updateCartUI() {
 }
 
 function toggleCart() { const drawer = document.getElementById('cart-drawer'); const overlay = document.getElementById('cart-overlay'); const open = drawer.classList.toggle('open'); overlay.classList.toggle('open', open); document.body.style.overflow = open ? 'hidden' : ''; }
-function handleContact(event) {
+async function handleContact(event) {
   event.preventDefault();
-  const email = String(window.FILEMENTOR_CONTACT_EMAIL || '').trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    showToast('İletişim formu henüz etkin değil. Lütfen daha sonra tekrar deneyin.');
-    return;
-  }
   const form = event.currentTarget;
+  const button = form.querySelector('button[type="submit"]');
   const name = form.elements.namedItem('name')?.value.trim() || '';
-  const replyTo = form.elements.namedItem('email')?.value.trim() || '';
+  const email = form.elements.namedItem('email')?.value.trim() || '';
   const detail = form.elements.namedItem('detail')?.value.trim() || '';
-  const subject = encodeURIComponent(`Özel sipariş talebi - ${name}`);
-  const body = encodeURIComponent(`Ad Soyad: ${name}\nE-posta: ${replyTo}\n\nSipariş detayı:\n${detail}`);
-  window.location.assign(`mailto:${email}?subject=${subject}&body=${body}`);
+
+  if (button) { button.disabled = true; button.textContent = 'Gönderiliyor...'; }
+  try {
+    const response = await fetch(`${window.FILEMENTOR_API_BASE}/api/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, detail }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'Mesaj gönderilemedi.');
+    form.reset();
+    showToast('Mesajınız gönderildi. En kısa sürede dönüş yapacağız.');
+  } catch (error) {
+    showToast(error instanceof Error ? error.message : 'Mesaj gönderilemedi. Lütfen tekrar deneyin.');
+  } finally {
+    if (button) { button.disabled = false; button.textContent = 'Gönder'; }
+  }
 }
 let toastTimer;
 function showToast(message) { const element = document.getElementById('toast'); if (!element) return; element.textContent = message; element.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => element.classList.remove('show'), 2800); }
