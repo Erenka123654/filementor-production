@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 
@@ -15,7 +15,7 @@
   <header class="navbar">
     <div class="container nav-inner">
       <a href="index.html" class="logo">
-        <span class="logo-icon">⬡</span>
+        <span class="logo-icon">FS</span>
         <span class="logo-text">Filementor<strong>Studio</strong></span>
       </a>
       <nav class="nav-links">
@@ -33,24 +33,55 @@
   <!-- ══════════════ HERO ══════════════ -->
   <section class="hero">
     <div class="container hero-inner">
-      <div class="hero-badge">3D BASKI TEKNOLOJİSİ</div>
-      <h1 class="hero-title">Hayal Et,<br/>Biz Üretelim.</h1>
-      <p class="hero-sub">El yapımı 3D baskı ürünler. Hızlı teslimat, özel sipariş, sınırsız tasarım.</p>
-      <div class="hero-actions">
-        <a href="#urunler" class="btn btn-primary">Ürünleri Keşfet</a>
-        <a href="#iletisim" class="btn btn-ghost">Özel Sipariş</a>
+      <div class="hero-copy">
+        <div class="eyebrow on-dark">3D BASKI STÜDYOSU</div>
+        <h1 class="hero-title">Hayal Et,<br/><em>Biz Üretelim.</em></h1>
+        <p class="hero-sub">El yapımı 3D baskı ürünler. Hızlı teslimat, özel sipariş, sınırsız tasarım.</p>
+        <div class="hero-actions">
+          <a href="#urunler" class="btn btn-primary">Ürünleri Keşfet</a>
+          <a href="#iletisim" class="btn btn-ghost">Özel Sipariş</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat"><span class="stat-n">150+</span><span class="stat-l">ÜRÜN</span></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span class="stat-n">500+</span><span class="stat-l">MUTLU MÜŞTERİ</span></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span class="stat-n">2 GÜN</span><span class="stat-l">TESLİMAT</span></div>
+        </div>
       </div>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-n">150+</span><span class="stat-l">Ürün</span></div>
-        <div class="stat-div"></div>
-        <div class="stat"><span class="stat-n">500+</span><span class="stat-l">Mutlu Müşteri</span></div>
-        <div class="stat-div"></div>
-        <div class="stat"><span class="stat-n">2 Gün</span><span class="stat-l">Teslimat</span></div>
+
+      <!-- İmza öğe: katman katman baskı animasyonu -->
+      <div class="print-visual" aria-hidden="true">
+        <div class="print-frame">
+          <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id="lampClip">
+                <path d="M 90 60 C 90 40, 190 40, 190 60 L 205 150 C 205 165, 75 165, 75 150 Z M 120 165 L 160 165 L 160 220 L 120 220 Z M 100 220 L 180 220 L 180 232 L 100 232 Z" />
+              </clipPath>
+            </defs>
+            <g clip-path="url(#lampClip)">
+              <rect class="layer-rect" x="70" y="225" width="140" height="8"  style="animation-delay:0s"/>
+              <rect class="layer-rect" x="70" y="216" width="140" height="8"  style="animation-delay:.12s"/>
+              <rect class="layer-rect" x="70" y="200" width="140" height="8"  style="animation-delay:.28s"/>
+              <rect class="layer-rect" x="70" y="184" width="140" height="8"  style="animation-delay:.42s"/>
+              <rect class="layer-rect" x="70" y="168" width="140" height="8"  style="animation-delay:.56s"/>
+              <rect class="layer-rect" x="70" y="152" width="140" height="8"  style="animation-delay:.7s"/>
+              <rect class="layer-rect" x="70" y="136" width="140" height="8"  style="animation-delay:.86s"/>
+              <rect class="layer-rect" x="70" y="120" width="140" height="8"  style="animation-delay:1s"/>
+              <rect class="layer-rect" x="70" y="104" width="140" height="8"  style="animation-delay:1.16s"/>
+              <rect class="layer-rect" x="70" y="88"  width="140" height="8"  style="animation-delay:1.3s"/>
+              <rect class="layer-rect" x="70" y="72"  width="140" height="8"  style="animation-delay:1.46s"/>
+              <rect class="layer-rect" x="70" y="56"  width="140" height="8"  style="animation-delay:1.6s"/>
+            </g>
+            <path class="outline-path" d="M 90 60 C 90 40, 190 40, 190 60 L 205 150 C 205 165, 75 165, 75 150 Z M 120 165 L 160 165 L 160 220 L 120 220 Z M 100 220 L 180 220 L 180 232 L 100 232 Z" />
+            <circle class="nozzle-dot" r="4" />
+          </svg>
+        </div>
+        <div class="print-readout">
+          <span class="accent">PLA+ · 210°C · %15 DOLGU</span>
+          <span>KATMAN YÜKSEKLİĞİ 0.16mm</span>
+        </div>
       </div>
-    </div>
-    <div class="hero-deco" aria-hidden="true">
-      <div class="deco-circle c1"></div>
-      <div class="deco-circle c2"></div>
     </div>
   </section>
 
@@ -58,7 +89,10 @@
   <section class="products-section" id="urunler">
     <div class="container">
       <div class="section-head">
-        <h2 class="section-title">Ürünler</h2>
+        <div>
+          <div class="eyebrow">ÜRÜNLER</div>
+          <h2 class="section-title">Baskıdan çıkanlar.</h2>
+        </div>
         <div class="filter-row" id="filter-row"></div>
       </div>
       <div class="product-grid" id="product-grid"></div>
@@ -69,21 +103,26 @@
   <section class="about-section" id="hakkimizda">
     <div class="container about-inner">
       <div class="about-text">
-        <div class="section-badge">BİZ KİMİZ</div>
+        <div class="eyebrow">BİZ KİMİZ</div>
         <h2 class="about-title">Tutkuyla üretiyoruz.</h2>
         <p class="about-desc">Filementor Studio olarak yüksek kaliteli FDM ve reçine 3D yazıcılarımızla her türlü tasarımı hayata geçiriyoruz. Dekordan oyuncağa, hobi ürünlerinden endüstriyel prototiplere kadar geniş bir yelpazede üretim yapıyoruz.</p>
         <ul class="about-list">
-          <li>✓ Yüksek çözünürlüklü baskı</li>
-          <li>✓ 10+ farklı renk ve malzeme</li>
-          <li>✓ Özel sipariş ve prototip üretimi</li>
-          <li>✓ Türkiye geneli kargo</li>
+          <li>Yüksek çözünürlüklü baskı</li>
+          <li>10+ farklı renk ve malzeme</li>
+          <li>Özel sipariş ve prototip üretimi</li>
+          <li>Türkiye geneli kargo</li>
         </ul>
       </div>
       <div class="about-visual" aria-hidden="true">
-        <div class="printer-card">
-          <div class="printer-emoji">🖨️</div>
-          <p>FDM 3D Yazıcı</p>
-          <span>0.2mm çözünürlük</span>
+        <div class="spec-card">
+          <div class="spec-card-head">
+            <span>PRINTER_STATUS.LOG</span>
+            <span class="spec-dot"></span>
+          </div>
+          <div class="spec-row"><span>YAZICI</span><span>FDM / Reçine</span></div>
+          <div class="spec-row"><span>ÇÖZÜNÜRLÜK</span><span>0.1–0.3mm</span></div>
+          <div class="spec-row"><span>MALZEME</span><span>10+ renk</span></div>
+          <div class="spec-row"><span>KARGO</span><span>Türkiye geneli</span></div>
         </div>
       </div>
     </div>
@@ -92,8 +131,11 @@
   <!-- ══════════════ İLETİŞİM ══════════════ -->
   <section class="contact-section" id="iletisim">
     <div class="container contact-inner">
-      <h2 class="contact-title">Özel Sipariş Ver</h2>
-      <p class="contact-sub">Aklındaki tasarımı bize anlat, sana özel üretelim.</p>
+      <div class="contact-head">
+        <div class="eyebrow">ÖZEL SİPARİŞ</div>
+        <h2 class="contact-title">Aklındakini bize anlat.</h2>
+        <p class="contact-sub">Tasarımını üretelim, sana özel üretim yapalım.</p>
+      </div>
       <form class="contact-form" onsubmit="handleContact(event)">
         <div class="form-row">
           <div class="form-group">
@@ -138,7 +180,7 @@
         <span>Ara Toplam</span><span id="cart-subtotal">₺0</span>
       </div>
       <div class="cart-total-row">
-        <span>Kargo</span><span style="color:var(--brand);font-weight:600">Ücretsiz</span>
+        <span>Kargo</span><span style="color:var(--filament-deep);font-weight:600">Ücretsiz</span>
       </div>
       <div class="cart-total-row grand">
         <span>Toplam</span><strong id="cart-total">₺0</strong>

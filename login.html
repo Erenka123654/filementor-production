@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Yönetici Girişi — Filementor Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; }
     body {
@@ -12,55 +15,74 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #0f0f12;
+      font-family: 'Hanken Grotesk', sans-serif;
+      background: #15130f;
+      background-image: radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 22px 22px;
     }
     .login-box {
       width: 100%;
       max-width: 360px;
-      background: #1a1a1f;
-      border: 1px solid #2a2a30;
+      background: #1c1a15;
+      border: 1px solid rgba(255,255,255,.1);
       border-radius: 14px;
       padding: 2rem;
     }
+    .login-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #ff8a5c;
+      text-align: center;
+      margin-bottom: .75rem;
+      letter-spacing: .4px;
+    }
+    .login-eyebrow::before { content: '; '; color: rgba(255,255,255,.35); }
     h1 {
-      font-size: 1.25rem;
+      font-family: 'Unbounded', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 700;
       color: #fff;
       margin: 0 0 1.5rem;
       text-align: center;
     }
     label {
       display: block;
-      font-size: 0.85rem;
-      color: #aaa;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      color: #9c9686;
       margin-bottom: 6px;
     }
     input {
       width: 100%;
       padding: 10px 12px;
       margin-bottom: 1rem;
-      border-radius: 8px;
-      border: 1px solid #333;
-      background: #111;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: #100e0b;
       color: #fff;
+      font-family: 'Hanken Grotesk', sans-serif;
       font-size: 0.95rem;
     }
-    input:focus { outline: 2px solid #6366f1; }
+    input:focus { outline: 2px solid #ff4d1c; outline-offset: 1px; }
     button {
       width: 100%;
       padding: 11px;
       border: none;
-      border-radius: 8px;
-      background: #6366f1;
+      border-radius: 6px;
+      background: #ff4d1c;
       color: #fff;
-      font-weight: 600;
+      font-weight: 700;
+      font-family: 'Hanken Grotesk', sans-serif;
       cursor: pointer;
       font-size: 0.95rem;
+      transition: background .15s;
     }
-    button:hover { background: #4f46e5; }
+    button:hover { background: #c93807; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     .error {
-      color: #f87171;
+      color: #ff8a7a;
       font-size: 0.85rem;
       margin: -0.5rem 0 1rem;
       min-height: 1em;
@@ -70,6 +92,7 @@
 </head>
 <body>
   <div class="login-box">
+    <div class="login-eyebrow">YÖNETİM PANELİ</div>
     <h1>🔒 Yönetici Girişi</h1>
     <form id="login-form">
       <label for="username">Kullanıcı Adı</label>
