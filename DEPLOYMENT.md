@@ -82,7 +82,7 @@ Cloudflare Pages'te bu GitHub reposunu bağlayın:
 
 Pages projesine `filementorstudio.net` ve `www.filementorstudio.net` custom domainlerini ekleyin. `js/api-config.js` production ortamında otomatik olarak `https://api.filementorstudio.net` kullanır.
 
-Yayınlamadan önce `FILEMENTOR_PAYMENT_URL` değerini yalnızca sağlayıcının HTTPS hosted-checkout adresine, `FILEMENTOR_CONTACT_EMAIL` değerini ise izlenen genel iletişim adresine ayarlayın. `dist` çıktısı backend kaynaklarını, yerel secret dosyalarını ve geliştirme bağımlılıklarını yayınlamaz.
+Yayınlamadan önce `FILEMENTOR_PAYMENT_URL` değerini yalnızca sağlayıcının HTTPS hosted-checkout adresine ayarlayın. İletişim formunun alıcı ve gönderici adresleri Worker tarafındaki `CONTACT_TO_EMAIL` ve `CONTACT_FROM_EMAIL` değişkenleriyle yönetilir. `dist` çıktısı backend kaynaklarını, yerel secret dosyalarını ve geliştirme bağımlılıklarını yayınlamaz.
 
 ## 8. Production smoke test
 

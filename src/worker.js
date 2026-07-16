@@ -204,8 +204,9 @@ async function readJsonBody(request) {
 
 async function enforceRateLimit(request, env, path) {
   const login = path === "/api/admin/login";
-  const windowSeconds = login ? 900 : 60;
-  const limit = login ? 5 : 60;
+  const contact = path === "/api/contact";
+  const windowSeconds = login || contact ? 900 : 60;
+  const limit = login ? 5 : contact ? 5 : 60;
   const windowId = Math.floor(Date.now() / (windowSeconds * 1000));
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
   const key = `${ip}:${path}:${windowId}`;
@@ -218,6 +219,26 @@ async function enforceRateLimit(request, env, path) {
     RETURNING count
   `).bind(key, (windowId + 1) * windowSeconds).first();
   return Number(result?.count || 0) <= limit;
+}
+
+function validateContact(body) {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return "Geçersiz iletişim isteği.";
+  const name = String(body.name ?? "").trim();
+  const email = String(body.email ?? "").trim();
+  const detail = String(body.detail ?? "").trim();
+  if (name.length < 2 || name.length > 120) return "Ad soyad 2 ile 120 karakter arasında olmalıdır.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return "E-posta adresi geçersiz.";
+  if (detail.length < 10 || detail.length > 2000) return "Sipariş detayı 10 ile 2000 karakter arasında olmalıdır.";
+  return null;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function validateCheckout(body) {
@@ -519,6 +540,40 @@ export default {
           ok: true,
           service: "filementor-api",
         });
+      }
+
+      if (path === "/api/contact" && request.method === "POST") {
+        if (!ALLOWED_ORIGINS.has(request.headers.get("Origin"))) {
+          return jsonResponse(request, { error: "İstek kaynağı reddedildi." }, 403);
+        }
+        const contact = await readJsonBody(request);
+        const validationError = validateContact(contact);
+        if (validationError) return jsonResponse(request, { error: validationError }, 400);
+        if (!env.EMAIL || !env.CONTACT_FROM_EMAIL || !env.CONTACT_TO_EMAIL) {
+          return jsonResponse(request, { error: "İletişim servisi henüz yapılandırılmadı." }, 503);
+        }
+
+        const name = String(contact.name).trim();
+        const email = String(contact.email).trim();
+        const detail = String(contact.detail).trim();
+        try {
+          await env.EMAIL.send({
+            to: env.CONTACT_TO_EMAIL,
+            from: { email: env.CONTACT_FROM_EMAIL, name: "Filementor Studio" },
+            replyTo: email,
+            subject: `Özel sipariş talebi - ${name}`,
+            text: `Ad Soyad: ${name}\nE-posta: ${email}\n\nSipariş detayı:\n${detail}`,
+            html: `<h2>Yeni özel sipariş talebi</h2><p><strong>Ad Soyad:</strong> ${escapeHtml(name)}</p><p><strong>E-posta:</strong> ${escapeHtml(email)}</p><p><strong>Sipariş detayı:</strong></p><p>${escapeHtml(detail).replaceAll("\n", "<br>")}</p>`,
+          });
+        } catch (error) {
+          console.error(JSON.stringify({
+            level: "error",
+            message: "Contact email delivery failed",
+            code: error && typeof error === "object" && "code" in error ? error.code : "unknown",
+          }));
+          return jsonResponse(request, { error: "Mesaj şu anda gönderilemedi. Lütfen daha sonra tekrar deneyin." }, 502);
+        }
+        return jsonResponse(request, { ok: true }, 201);
       }
 
       if (path === "/api/products" && request.method === "GET") {
