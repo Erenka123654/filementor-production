@@ -549,7 +549,7 @@ export default {
         const contact = await readJsonBody(request);
         const validationError = validateContact(contact);
         if (validationError) return jsonResponse(request, { error: validationError }, 400);
-        if (!env.EMAIL || !env.CONTACT_FROM_EMAIL || !env.CONTACT_TO_EMAIL) {
+        if (!env.RESEND_API_KEY || !env.CONTACT_FROM_EMAIL || !env.CONTACT_TO_EMAIL) {
           return jsonResponse(request, { error: "İletişim servisi henüz yapılandırılmadı." }, 503);
         }
 
@@ -557,14 +557,34 @@ export default {
         const email = String(contact.email).trim();
         const detail = String(contact.detail).trim();
         try {
-          await env.EMAIL.send({
-            to: env.CONTACT_TO_EMAIL,
-            from: { email: env.CONTACT_FROM_EMAIL, name: "Filementor Studio" },
-            replyTo: email,
-            subject: `Özel sipariş talebi - ${name}`,
-            text: `Ad Soyad: ${name}\nE-posta: ${email}\n\nSipariş detayı:\n${detail}`,
-            html: `<h2>Yeni özel sipariş talebi</h2><p><strong>Ad Soyad:</strong> ${escapeHtml(name)}</p><p><strong>E-posta:</strong> ${escapeHtml(email)}</p><p><strong>Sipariş detayı:</strong></p><p>${escapeHtml(detail).replaceAll("\n", "<br>")}</p>`,
+          // NOT: Domainin mevcut MX kaydı (Google Workspace) korunuyor.
+          // Bu istek Cloudflare Email Routing yerine Resend'in HTTP API'sini kullanır,
+          // bu yüzden gelen mail (MX) altyapısına hiç dokunmaz.
+          const resendResponse = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${env.RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from: `Filementor Studio <${env.CONTACT_FROM_EMAIL}>`,
+              to: [env.CONTACT_TO_EMAIL],
+              reply_to: email,
+              subject: `Özel sipariş talebi - ${name}`,
+              text: `Ad Soyad: ${name}\nE-posta: ${email}\n\nSipariş detayı:\n${detail}`,
+              html: `<h2>Yeni özel sipariş talebi</h2><p><strong>Ad Soyad:</strong> ${escapeHtml(name)}</p><p><strong>E-posta:</strong> ${escapeHtml(email)}</p><p><strong>Sipariş detayı:</strong></p><p>${escapeHtml(detail).replaceAll("\n", "<br>")}</p>`,
+            }),
           });
+          if (!resendResponse.ok) {
+            const errorBody = await resendResponse.text().catch(() => "");
+            console.error(JSON.stringify({
+              level: "error",
+              message: "Contact email delivery failed",
+              status: resendResponse.status,
+              body: errorBody.slice(0, 500),
+            }));
+            return jsonResponse(request, { error: "Mesaj şu anda gönderilemedi. Lütfen daha sonra tekrar deneyin." }, 502);
+          }
         } catch (error) {
           console.error(JSON.stringify({
             level: "error",
