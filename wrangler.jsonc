@@ -7,21 +7,17 @@
   "keep_vars": true,
   "vars": {
     "IYZICO_ENVIRONMENT": "sandbox",
-    "CONTACT_FROM_EMAIL": "noreply@filementorstudio.net",
+    "CONTACT_FROM_EMAIL": "noreply@mail.filementorstudio.net",
     "CONTACT_TO_EMAIL": "info@filementorstudio.net"
   },
-  "send_email": [
-    {
-      "name": "EMAIL"
-    }
-  ],
   "secrets": {
     "required": [
       "ADMIN_USERNAME",
       "ADMIN_PASSWORD",
       "SESSION_SECRET",
       "IYZICO_API_KEY",
-      "IYZICO_SECRET_KEY"
+      "IYZICO_SECRET_KEY",
+      "RESEND_API_KEY"
     ]
   },
   "observability": {
