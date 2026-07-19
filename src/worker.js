@@ -326,6 +326,23 @@ export default {
       });
     }
 
+    if (path === "/.well-known/security.txt" && request.method === "GET") {
+      const body = [
+        "Contact: mailto:info@filementorstudio.net",
+        "Expires: 2027-07-19T00:00:00.000Z",
+        "Preferred-Languages: tr, en",
+        `Canonical: https://${url.hostname}/.well-known/security.txt`,
+        "",
+      ].join("\n");
+      return new Response(body, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=UTF-8",
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
+
     try {
       if (!await enforceRateLimit(request, env, path)) {
         return jsonResponse(request, { error: "Çok fazla istek. Daha sonra tekrar deneyin." }, 429);
