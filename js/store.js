@@ -68,12 +68,14 @@ function closeLightbox() { document.getElementById('lightbox')?.classList.remove
 function addFromLightbox() { if (lightboxProductId !== null) { addToCart(lightboxProductId); closeLightbox(); } }
 
 function addToCart(id) {
-  const product = getProducts().find(item => sameId(item.id, id)); if (!product || product.status === 'out') return;
+  const product = getProducts().find(item => sameId(item.id, id));
+  if (!product) { showToast('Ürün bulunamadı, lütfen sayfayı yenileyin.'); return; }
+  if (product.status === 'out') { showToast(`"${product.name}" şu anda stokta yok.`); return; }
   const existing = cart.find(item => sameId(item.id, id));
   const stock = Number(product.stock) || 0;
-  if ((existing?.qty || 0) >= stock) { showToast(`“${product.name}” için stok sınırına ulaştınız.`); return; }
+  if ((existing?.qty || 0) >= stock) { showToast(`"${product.name}" için stok sınırına ulaştınız.`); return; }
   if (existing) existing.qty += 1; else cart.push({ ...product, qty: 1 });
-  updateCartUI(); showToast(`“${product.name}” sepete eklendi 🛒`);
+  updateCartUI(); showToast(`"${product.name}" sepete eklendi 🛒`);
 }
 function removeFromCart(id) { cart = cart.filter(item => !sameId(item.id, id)); updateCartUI(); }
 function changeQty(id, delta) {
