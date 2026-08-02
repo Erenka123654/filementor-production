@@ -68,7 +68,9 @@ function closeLightbox() { document.getElementById('lightbox')?.classList.remove
 function addFromLightbox() { if (lightboxProductId !== null) { addToCart(lightboxProductId); closeLightbox(); } }
 
 function addToCart(id) {
-  const product = getProducts().find(item => sameId(item.id, id)); if (!product || product.status === 'out') return;
+  const product = getProducts().find(item => sameId(item.id, id));
+  if (!product) { showToast('Ürün bulunamadı, lütfen sayfayı yenileyin.'); return; }
+  if (product.status === 'out') { showToast(`“${product.name}” şu anda stokta yok.`); return; }
   const existing = cart.find(item => sameId(item.id, id));
   const stock = Number(product.stock) || 0;
   if ((existing?.qty || 0) >= stock) { showToast(`“${product.name}” için stok sınırına ulaştınız.`); return; }
@@ -133,4 +135,14 @@ let toastTimer;
 function showToast(message) { const element = document.getElementById('toast'); if (!element) return; element.textContent = message; element.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => element.classList.remove('show'), 2800); }
 
 document.addEventListener('keydown', event => { if (event.key === 'Escape') { closeLightbox(); if (typeof closeCheckout === 'function') closeCheckout(); } });
-document.addEventListener('DOMContentLoaded', async () => { await fetchProducts(); renderFilters(); renderGrid(); document.getElementById('cart-btn')?.addEventListener('click', toggleCart); });
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchProducts(); renderFilters(); renderGrid();
+  document.getElementById('cart-btn')?.addEventListener('click', toggleCart);
+  document.getElementById('cart-overlay')?.addEventListener('click', toggleCart);
+  document.getElementById('cart-close-btn')?.addEventListener('click', toggleCart);
+  document.getElementById('lightbox')?.addEventListener('click', closeLightbox);
+  document.getElementById('lightbox-close-btn')?.addEventListener('click', closeLightbox);
+  document.getElementById('lightbox-inner')?.addEventListener('click', event => event.stopPropagation());
+  document.getElementById('lb-btn')?.addEventListener('click', addFromLightbox);
+  document.getElementById('contact-form')?.addEventListener('submit', handleContact);
+});

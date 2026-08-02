@@ -86,4 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (payment === 'success') { cart = []; updateCartUI(); showToast('Ödemeniz başarıyla alındı. Teşekkür ederiz!'); }
   if (payment === 'failed') showToast('Ödeme tamamlanamadı. Lütfen tekrar deneyin.');
   if (payment) window.history.replaceState({}, '', window.location.pathname + window.location.hash);
+
+  document.getElementById('checkout-btn')?.addEventListener('click', openCheckout);
+  document.getElementById('pay-overlay')?.addEventListener('click', closeCheckout);
+  document.getElementById('pay-close-btn')?.addEventListener('click', closeCheckout);
+  document.getElementById('step1-next-btn')?.addEventListener('click', () => goStep(2));
+  document.getElementById('step2-back-btn')?.addEventListener('click', () => goStep(1));
+  document.getElementById('step2-next-btn')?.addEventListener('click', () => goStep(3));
+  document.getElementById('pay-btn')?.addEventListener('click', processPayment);
+  document.getElementById('success-continue-btn')?.addEventListener('click', closeCheckout);
 });
