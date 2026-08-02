@@ -24,18 +24,64 @@ function productVisual(product, size) {
 }
 
 function showSection(name) {
-  ['dashboard', 'products', 'orders'].forEach(section => {
+  ['dashboard', 'products', 'orders', 'users'].forEach(section => {
     const el = document.getElementById(`section-${section}`);
     if (el) el.style.display = section === name ? '' : 'none';
   });
   document.querySelectorAll('.sidebar-link').forEach(link => link.classList.toggle('active', link.dataset.section === name));
-  setText('section-title', { dashboard: 'Dashboard', products: 'Ürünler', orders: 'Siparişler' }[name] || name);
+  setText('section-title', { dashboard: 'Dashboard', products: 'Ürünler', orders: 'Siparişler', users: 'Kullanıcılar' }[name] || name);
   const addButton = document.getElementById('add-btn');
   if (addButton) addButton.style.display = name === 'products' ? '' : 'none';
   currentSection = name;
   if (name === 'dashboard') renderDashboard();
   if (name === 'products') renderProductsTable();
   if (name === 'orders') renderOrders();
+  if (name === 'users') renderUsers();
+}
+
+async function renderUsers() {
+  const tbody = document.getElementById('users-tbody'); if (!tbody) return;
+  tbody.replaceChildren();
+  try {
+    const response = await fetch(`${window.FILEMENTOR_API_BASE || ''}/api/admin/users`, { credentials: 'include' });
+    if (!response.ok) throw new Error('Kullanıcılar alınamadı.');
+    const { users = [] } = await response.json();
+    if (!users.length) {
+      const row = document.createElement('tr'); const cell = node('td', '', 'Henüz kayıt yok.'); cell.colSpan = 5; row.append(cell); tbody.replaceChildren(row); return;
+    }
+    const statusLabels = { pending: 'Onay Bekliyor', approved: 'Onaylandı', rejected: 'Reddedildi' };
+    tbody.replaceChildren(...users.map(user => {
+      const row = document.createElement('tr');
+      row.append(
+        node('td', '', user.username),
+        node('td', '', user.role === 'owner' ? 'Owner' : 'Personel'),
+        node('td', '', statusLabels[user.status] || user.status),
+        node('td', '', new Date(user.created_at).toLocaleString('tr-TR'))
+      );
+      const actionsCell = node('td', '');
+      if (user.status === 'pending') {
+        const approve = node('button', 'tbl-btn', '✅ Onayla'); approve.type = 'button'; approve.addEventListener('click', () => setUserStatus(user.id, 'approve'));
+        const reject = node('button', 'tbl-btn tbl-btn-del', '🚫 Reddet'); reject.type = 'button'; reject.style.marginLeft = '4px'; reject.addEventListener('click', () => setUserStatus(user.id, 'reject'));
+        actionsCell.append(approve, reject);
+      } else {
+        actionsCell.textContent = '—';
+      }
+      row.append(actionsCell);
+      return row;
+    }));
+  } catch (error) { console.error(error); showToast('Kullanıcılar yüklenemedi.'); }
+}
+
+async function setUserStatus(id, action) {
+  try {
+    const response = await fetch(`${window.FILEMENTOR_API_BASE || ''}/api/admin/users/${id}/${action}`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('İşlem başarısız.');
+    showToast(action === 'approve' ? 'Kullanıcı onaylandı.' : 'Kullanıcı reddedildi.');
+    renderUsers();
+  } catch (error) { console.error(error); showToast('İşlem yapılamadı.'); }
 }
 
 async function renderOrders() {
@@ -241,5 +287,12 @@ function showToast(message) { const el = document.getElementById('toast'); if (!
 document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('.sidebar-link[data-section]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); showSection(link.dataset.section); }));
   document.addEventListener('change', event => { if (event.target.id === 'f-image' && event.target.files[0]) handleImageFile(event.target.files[0]); });
+
+  const session = window.__ADMIN_READY ? await window.__ADMIN_READY : null;
+  if (session && session.role === 'owner') {
+    const usersLink = document.getElementById('users-nav-link');
+    if (usersLink) usersLink.style.display = '';
+  }
+
   await fetchProducts(); showSection('dashboard');
 });

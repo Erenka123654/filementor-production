@@ -12,8 +12,6 @@
   },
   "secrets": {
     "required": [
-      "ADMIN_USERNAME",
-      "ADMIN_PASSWORD",
       "SESSION_SECRET",
       "IYZICO_API_KEY",
       "IYZICO_SECRET_KEY",
