@@ -288,6 +288,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('.sidebar-link[data-section]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); showSection(link.dataset.section); }));
   document.addEventListener('change', event => { if (event.target.id === 'f-image' && event.target.files[0]) handleImageFile(event.target.files[0]); });
 
+  document.getElementById('logout-btn')?.addEventListener('click', adminLogout);
+  document.getElementById('add-btn')?.addEventListener('click', () => openModal());
+  document.getElementById('search-input')?.addEventListener('input', filterProducts);
+  document.getElementById('modal-overlay')?.addEventListener('click', event => { if (event.target === event.currentTarget) closeModal(); });
+  document.getElementById('modal-close-btn')?.addEventListener('click', closeModal);
+  document.getElementById('modal-cancel-btn')?.addEventListener('click', closeModal);
+  document.getElementById('modal-save-btn')?.addEventListener('click', saveProduct);
+
   const session = window.__ADMIN_READY ? await window.__ADMIN_READY : null;
   if (session && session.role === 'owner') {
     const usersLink = document.getElementById('users-nav-link');

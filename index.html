@@ -146,7 +146,7 @@
         <h2 class="contact-title">Aklındakini bize anlat.</h2>
         <p class="contact-sub">Tasarımını üretelim, sana özel üretim yapalım.</p>
       </div>
-      <form class="contact-form" onsubmit="handleContact(event)">
+      <form class="contact-form" id="contact-form">
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Ad Soyad</label>
@@ -183,11 +183,11 @@
   <script src="js/cookie-consent.js" defer></script>
 
   <!-- ══════════════ SEPET DRAWER ══════════════ -->
-  <div class="overlay" id="cart-overlay" onclick="toggleCart()"></div>
+  <div class="overlay" id="cart-overlay"></div>
   <aside class="cart-drawer" id="cart-drawer" aria-label="Sepet">
     <div class="cart-header">
       <h3>🛒 Sepetim</h3>
-      <button class="close-btn" onclick="toggleCart()" aria-label="Kapat">✕</button>
+      <button class="close-btn" id="cart-close-btn" aria-label="Kapat">✕</button>
     </div>
     <div class="cart-items" id="cart-items">
       <p class="cart-empty">Sepetiniz boş.</p>
@@ -202,14 +202,14 @@
       <div class="cart-total-row grand">
         <span>Toplam</span><strong id="cart-total">₺0</strong>
       </div>
-      <button class="btn btn-primary btn-full" onclick="openCheckout()">💳 Ödemeye Geç</button>
+      <button class="btn btn-primary btn-full" id="checkout-btn">💳 Ödemeye Geç</button>
     </div>
   </aside>
 
   <!-- ══════════════ LİGHTBOX ══════════════ -->
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()" aria-modal="true" role="dialog">
-    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Kapat">✕</button>
-    <div class="lightbox-inner" onclick="event.stopPropagation()">
+  <div class="lightbox" id="lightbox" aria-modal="true" role="dialog">
+    <button class="lightbox-close" id="lightbox-close-btn" aria-label="Kapat">✕</button>
+    <div class="lightbox-inner" id="lightbox-inner">
       <div class="lightbox-img-wrap" id="lb-img-wrap"></div>
       <div class="lightbox-info">
         <div class="lightbox-badges" id="lb-badges"></div>
@@ -218,18 +218,18 @@
         <p class="lightbox-desc" id="lb-desc"></p>
         <div class="lightbox-footer">
           <span class="lightbox-price" id="lb-price"></span>
-          <button class="btn btn-primary" id="lb-btn" onclick="addFromLightbox()">Sepete Ekle</button>
+          <button class="btn btn-primary" id="lb-btn">Sepete Ekle</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ══════════════ ÖDEME MODALI ══════════════ -->
-  <div class="overlay" id="pay-overlay" onclick="closeCheckout()"></div>
+  <div class="overlay" id="pay-overlay"></div>
   <div class="pay-modal" id="pay-modal">
     <div class="pay-header">
       <h3>💳 Güvenli Ödeme</h3>
-      <button class="close-btn" onclick="closeCheckout()">✕</button>
+      <button class="close-btn" id="pay-close-btn">✕</button>
     </div>
 
     <!-- Adım 1: Kişisel Bilgiler -->
@@ -281,7 +281,7 @@
         <label class="form-label">Posta Kodu *</label>
         <input class="form-input" id="pay-zip" type="text" inputmode="numeric" minlength="5" maxlength="5" autocomplete="postal-code" placeholder="34000" />
       </div>
-      <button class="btn btn-primary btn-full" onclick="goStep(2)">Devam Et →</button>
+      <button class="btn btn-primary btn-full" id="step1-next-btn">Devam Et →</button>
     </div>
 
     <!-- Adım 2: Kart Bilgileri -->
@@ -318,8 +318,8 @@
       </div>
 
       <div style="display:flex;gap:10px;margin-top:1rem">
-        <button class="btn btn-ghost" onclick="goStep(1)" style="flex:0 0 auto">← Geri</button>
-        <button class="btn btn-primary btn-full" onclick="goStep(3)">Siparişi Onayla →</button>
+        <button class="btn btn-ghost" id="step2-back-btn" style="flex:0 0 auto">← Geri</button>
+        <button class="btn btn-primary btn-full" id="step2-next-btn">Siparişi Onayla →</button>
       </div>
     </div>
 
@@ -337,7 +337,7 @@
         <strong id="order-total-final">₺0</strong>
       </div>
       <p class="order-note">3D Secure doğrulaması için bankanızın sayfasına yönlendirileceksiniz.</p>
-      <button class="btn btn-primary btn-full btn-pay" id="pay-btn" onclick="processPayment()">
+      <button class="btn btn-primary btn-full btn-pay" id="pay-btn">
         🔒 Güvenli Ödemeyi Tamamla
       </button>
     </div>
@@ -348,7 +348,7 @@
       <h3 class="success-title">Ödeme Başarılı!</h3>
       <p class="success-sub">Siparişiniz alındı. E-posta adresinize onay gönderildi.</p>
       <p class="success-order" id="success-order-no"></p>
-      <button class="btn btn-primary btn-full" onclick="closeCheckout()">Alışverişe Devam Et</button>
+      <button class="btn btn-primary btn-full" id="success-continue-btn">Alışverişe Devam Et</button>
     </div>
   </div>
 
