@@ -7,16 +7,22 @@
 
 const ADMIN_API_BASE = window.FILEMENTOR_API_BASE || "";
 
-(async function checkAdminSession() {
+window.__ADMIN_READY = (async function checkAdminSession() {
   try {
     const res = await fetch(`${ADMIN_API_BASE}/api/admin/me`, {
       credentials: "include",
     });
     if (!res.ok) {
       window.location.replace("login.html");
+      return null;
     }
+    const data = await res.json();
+    window.__ADMIN_USERNAME = data.username || "";
+    window.__ADMIN_ROLE = data.role || "staff";
+    return data;
   } catch (err) {
     window.location.replace("login.html");
+    return null;
   }
 })();
 

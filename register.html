@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yönetici Girişi — Filementor Studio</title>
+  <title>Yönetici Kaydı — Filementor Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -22,7 +22,7 @@
     }
     .login-box {
       width: 100%;
-      max-width: 360px;
+      max-width: 380px;
       background: #1c1a15;
       border: 1px solid rgba(255,255,255,.1);
       border-radius: 14px;
@@ -42,8 +42,15 @@
       font-size: 1.15rem;
       font-weight: 700;
       color: #fff;
-      margin: 0 0 1.5rem;
+      margin: 0 0 .5rem;
       text-align: center;
+    }
+    .subtitle {
+      font-size: 0.8rem;
+      color: #9c9686;
+      text-align: center;
+      margin: 0 0 1.5rem;
+      line-height: 1.4;
     }
     label {
       display: block;
@@ -66,15 +73,11 @@
       font-size: 0.95rem;
     }
     input:focus { outline: 2px solid #ff4d1c; outline-offset: 1px; }
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 1.25rem;
-      font-size: 0.85rem;
-      color: #9c9686;
-      text-decoration: none;
+    .hint {
+      font-size: 0.72rem;
+      color: #726c5e;
+      margin: -0.7rem 0 1rem;
     }
-    .back-link:hover { color: #fff; }
     button {
       width: 100%;
       padding: 11px;
@@ -96,24 +99,46 @@
       margin: -0.5rem 0 1rem;
       min-height: 1em;
     }
+    .success {
+      color: #7cd992;
+      font-size: 0.85rem;
+      margin: -0.5rem 0 1rem;
+      min-height: 1em;
+      line-height: 1.4;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: #9c9686;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #fff; }
   </style>
   <script src="js/api-config.js?v=3"></script>
 </head>
 <body>
   <div class="login-box">
     <div class="login-eyebrow">YÖNETİM PANELİ</div>
-    <h1>🔒 Yönetici Girişi</h1>
-    <form id="login-form">
+    <h1>📝 Yönetici Kaydı</h1>
+    <p class="subtitle">Kayıt olduktan sonra hesabınız mevcut bir yönetici tarafından onaylanana kadar giriş yapamazsınız.</p>
+    <form id="register-form">
       <label for="username">Kullanıcı Adı</label>
-      <input type="text" id="username" autocomplete="username" required />
+      <input type="text" id="username" autocomplete="username" pattern="[a-z0-9_]{3,32}" required />
+      <p class="hint">3-32 karakter, sadece küçük harf, rakam ve alt çizgi.</p>
       <label for="password">Şifre</label>
-      <input type="password" id="password" autocomplete="current-password" required />
+      <input type="password" id="password" autocomplete="new-password" minlength="10" required />
+      <p class="hint">En az 10 karakter.</p>
+      <label for="password2">Şifre (Tekrar)</label>
+      <input type="password" id="password2" autocomplete="new-password" minlength="10" required />
       <p class="error" id="error-msg"></p>
-      <button type="submit" id="submit-btn">Giriş Yap</button>
+      <p class="success" id="success-msg"></p>
+      <button type="submit" id="submit-btn">Kayıt Ol</button>
     </form>
-    <a class="back-link" href="register.html">Hesabınız yok mu? Kayıt olun</a>
+    <a class="back-link" href="login.html">← Giriş sayfasına dön</a>
   </div>
 
-  <script src="js/login.js?v=1"></script>
+  <script src="js/register.js?v=1"></script>
 </body>
 </html>

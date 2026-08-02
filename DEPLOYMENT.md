@@ -38,15 +38,23 @@ npx wrangler d1 export filementor-db --remote --output backup.sql
 Değerleri komut satırı argümanı olarak vermeyin; aşağıdaki komutlar güvenli interaktif giriş ister:
 
 ```powershell
-npx wrangler secret put ADMIN_USERNAME
-npx wrangler secret put ADMIN_PASSWORD
 npx wrangler secret put SESSION_SECRET
 npx wrangler secret put IYZICO_API_KEY
 npx wrangler secret put IYZICO_SECRET_KEY
 npx wrangler secret put IYZICO_ENVIRONMENT
 ```
 
-`SESSION_SECRET` en az 32 rastgele karakter olmalıdır. Admin parolası benzersiz ve uzun olmalıdır.
+`SESSION_SECRET` en az 32 rastgele karakter olmalıdır.
+
+Yönetici hesapları artık `ADMIN_USERNAME`/`ADMIN_PASSWORD` env secret'ları yerine `admin_users` D1 tablosunda tutulur
+(bkz. `migrations/0003_admin_users.sql`). İlk (owner) hesabı oluşturmak için:
+
+```powershell
+node scripts/create-admin.js <kullanici_adi> <sifre> owner
+```
+
+Script'in ekrana bastığı `wrangler d1 execute` komutunu çalıştırın. Bundan sonraki hesaplar `register.html` üzerinden
+kayıt olup owner onayı bekleyebilir; onaylama işlemi admin panelindeki "Kullanıcılar" sekmesinden yapılır.
 
 İlk entegrasyonda `IYZICO_ENVIRONMENT` değerini `sandbox` girin ve iyzico sandbox anahtarlarını kullanın. Sandbox ödemesi uçtan uca doğrulandıktan sonra production anahtarlarını yükleyip değeri `production` yapın. Anahtarları GitHub veya Cloudflare build değişkenlerinde düz metin olarak saklamayın.
 

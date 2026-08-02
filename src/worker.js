@@ -55,6 +55,30 @@ function bytes(value) {
   return new TextEncoder().encode(value);
 }
 
+function toHex(buffer) {
+  return [...new Uint8Array(buffer)].map(value => value.toString(16).padStart(2, "0")).join("");
+}
+
+function fromHex(hex) {
+  const clean = /^[0-9a-f]+$/i.test(hex) && hex.length % 2 === 0 ? hex : "";
+  const out = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(clean.slice(i * 2, i * 2 + 2), 16);
+  return out;
+}
+
+const PBKDF2_ITERATIONS = 100000;
+
+async function hashPassword(password, saltHex) {
+  const salt = saltHex ? fromHex(saltHex) : crypto.getRandomValues(new Uint8Array(16));
+  const keyMaterial = await crypto.subtle.importKey("raw", bytes(password), "PBKDF2", false, ["deriveBits"]);
+  const derived = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256" },
+    keyMaterial,
+    256
+  );
+  return { hash: toHex(derived), salt: toHex(salt) };
+}
+
 async function safeEqual(left, right) {
   const [a, b] = await Promise.all([
     crypto.subtle.digest("SHA-256", bytes(String(left || ""))),
@@ -72,26 +96,42 @@ async function sessionSignature(payload, secret) {
     .replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
-async function createSession(env) {
-  const payload = `${Date.now() + 60 * 60 * 1000}.${crypto.randomUUID()}`;
+async function createSession(env, user) {
+  const username = encodeURIComponent(user.username);
+  const role = user.role === "owner" ? "owner" : "staff";
+  const payload = `${Date.now() + 60 * 60 * 1000}.${crypto.randomUUID()}.${username}.${role}`;
   return `${payload}.${await sessionSignature(payload, env.SESSION_SECRET)}`;
 }
 
-async function hasValidSession(request, env) {
+async function currentUser(request, env) {
   const secret = env.SESSION_SECRET;
-  if (!secret) return false;
+  if (!secret) return null;
   const token = getCookie(request, "admin_session");
   const separator = token.lastIndexOf(".");
-  if (separator < 1) return false;
+  if (separator < 1) return null;
   const payload = token.slice(0, separator);
   const signature = token.slice(separator + 1);
-  const expiresAt = Number(payload.split(".", 1)[0]);
-  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return false;
-  return safeEqual(signature, await sessionSignature(payload, secret));
+  const parts = payload.split(".");
+  const expiresAt = Number(parts[0]);
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) return null;
+  const valid = await safeEqual(signature, await sessionSignature(payload, secret));
+  if (!valid) return null;
+  const username = decodeURIComponent(parts[2] || "");
+  if (!username) return null;
+  return { username, role: parts[3] === "owner" ? "owner" : "staff" };
+}
+
+async function hasValidSession(request, env) {
+  return Boolean(await currentUser(request, env));
 }
 
 async function isAuthorized(request, env) {
   return hasValidSession(request, env);
+}
+
+async function isOwner(request, env) {
+  const user = await currentUser(request, env);
+  return Boolean(user && user.role === "owner");
 }
 
 function validateProduct(product) {
@@ -203,7 +243,7 @@ async function readJsonBody(request) {
 }
 
 async function enforceRateLimit(request, env, path) {
-  const login = path === "/api/admin/login";
+  const login = path === "/api/admin/login" || path === "/api/admin/register";
   const contact = path === "/api/contact";
   const windowSeconds = login || contact ? 900 : 60;
   const limit = login ? 5 : contact ? 5 : 60;
@@ -341,32 +381,96 @@ export default {
 
       if (path === "/api/admin/login" && request.method === "POST") {
         const credentials = await readJsonBody(request);
-        const configured = Boolean(env.ADMIN_PASSWORD && env.SESSION_SECRET);
-        const expectedUsername = env.ADMIN_USERNAME || "admin";
         const validShape = credentials && typeof credentials === "object" &&
           !Array.isArray(credentials) &&
           typeof credentials.username === "string" &&
           typeof credentials.password === "string" &&
-          credentials.username.length <= 100 && credentials.password.length <= 200;
-        const usernameOk = validShape && configured &&
-          await safeEqual(credentials.username.trim(), expectedUsername);
-        const passwordOk = validShape && configured &&
-          await safeEqual(credentials.password, env.ADMIN_PASSWORD);
-        if (!usernameOk || !passwordOk) {
+          credentials.username.length >= 1 && credentials.username.length <= 100 &&
+          credentials.password.length >= 1 && credentials.password.length <= 200;
+
+        if (!validShape || !env.SESSION_SECRET) {
           return jsonResponse(request, { ok: false, message: "Kullanıcı adı veya şifre hatalı." }, 401);
         }
+
+        const username = credentials.username.trim().toLowerCase();
+        const row = await env.DB.prepare(
+          "SELECT username, password_hash, password_salt, role, status FROM admin_users WHERE username = ?"
+        ).bind(username).first();
+
+        // Sabit bir salt ile hashleme yapılır ki kullanıcı var/yok farkı zaman ölçümünden anlaşılmasın.
+        const salt = row?.password_salt || "00000000000000000000000000000000";
+        const { hash: computedHash } = await hashPassword(credentials.password, salt);
+        const passwordOk = Boolean(row) && row.status === "approved" &&
+          await safeEqual(computedHash, row.password_hash);
+
+        if (!passwordOk) {
+          return jsonResponse(request, { ok: false, message: "Kullanıcı adı veya şifre hatalı." }, 401);
+        }
+
         const response = jsonResponse(request, { ok: true });
         response.headers.append(
           "Set-Cookie",
-          sessionCookie(request, await createSession(env), 3600)
+          sessionCookie(request, await createSession(env, row), 3600)
         );
         return response;
       }
 
+      if (path === "/api/admin/register" && request.method === "POST") {
+        const body = await readJsonBody(request);
+        const username = typeof body?.username === "string" ? body.username.trim().toLowerCase() : "";
+        const password = typeof body?.password === "string" ? body.password : "";
+
+        if (!/^[a-z0-9_]{3,32}$/.test(username)) {
+          return jsonResponse(request, { ok: false, message: "Kullanıcı adı 3-32 karakter olmalı; sadece küçük harf, rakam ve alt çizgi içerebilir." }, 400);
+        }
+        if (password.length < 10 || password.length > 200) {
+          return jsonResponse(request, { ok: false, message: "Şifre en az 10 karakter olmalıdır." }, 400);
+        }
+
+        const existing = await env.DB.prepare("SELECT id FROM admin_users WHERE username = ?").bind(username).first();
+        if (existing) {
+          return jsonResponse(request, { ok: false, message: "Bu kullanıcı adı zaten kayıtlı." }, 409);
+        }
+
+        const { hash, salt } = await hashPassword(password);
+        await env.DB.prepare(
+          "INSERT INTO admin_users (username, password_hash, password_salt, role, status, created_at) VALUES (?, ?, ?, 'staff', 'pending', ?)"
+        ).bind(username, hash, salt, Date.now()).run();
+
+        return jsonResponse(request, {
+          ok: true,
+          message: "Kayıt alındı. Hesabınız bir yönetici tarafından onaylandıktan sonra giriş yapabilirsiniz.",
+        });
+      }
+
       if (path === "/api/admin/me" && request.method === "GET") {
-        return await isAuthorized(request, env)
-          ? jsonResponse(request, { ok: true, username: env.ADMIN_USERNAME || "admin" })
+        const user = await currentUser(request, env);
+        return user
+          ? jsonResponse(request, { ok: true, username: user.username, role: user.role })
           : jsonResponse(request, { ok: false }, 401);
+      }
+
+      if (path === "/api/admin/users" && request.method === "GET") {
+        if (!await isOwner(request, env)) {
+          return jsonResponse(request, { error: "Yetkisiz işlem." }, 403);
+        }
+        const { results } = await env.DB.prepare(
+          "SELECT id, username, role, status, created_at, approved_by, approved_at FROM admin_users ORDER BY created_at DESC"
+        ).all();
+        return jsonResponse(request, { ok: true, users: results });
+      }
+
+      const userActionMatch = path.match(/^\/api\/admin\/users\/(\d+)\/(approve|reject)$/);
+      if (userActionMatch && request.method === "POST") {
+        if (!await isOwner(request, env)) {
+          return jsonResponse(request, { error: "Yetkisiz işlem." }, 403);
+        }
+        const owner = await currentUser(request, env);
+        const status = userActionMatch[2] === "approve" ? "approved" : "rejected";
+        await env.DB.prepare(
+          "UPDATE admin_users SET status = ?, approved_by = ?, approved_at = ? WHERE id = ?"
+        ).bind(status, owner.username, Date.now(), Number(userActionMatch[1])).run();
+        return jsonResponse(request, { ok: true });
       }
 
       if (path === "/api/admin/logout" && request.method === "POST") {

@@ -12,6 +12,22 @@ Filementor; ürün kataloğu, sepet ve güvenli yönetim panelinden oluşan stat
 
 Eski Express, Firebase ve dosya tabanlı backend uygulamaları kaldırılmıştır. Tek desteklenen backend `src/worker.js` dosyasıdır.
 
+## Yönetici hesapları
+
+Yönetici girişleri artık tek bir paylaşılan şifre yerine `admin_users` D1 tablosunda tutulur (bkz.
+`migrations/0003_admin_users.sql`). Yeni hesaplar `register.html` üzerinden kayıt olur, `pending` durumunda
+beklerler ve admin panelindeki **Kullanıcılar** sekmesinden (sadece `owner` rolündeki hesaplar görebilir)
+onaylanana kadar giriş yapamazlar. İlk owner hesabını oluşturmak için `scripts/create-admin.js`'e bakın.
+
+Mağaza vitrininde artık herkese açık bir "Yönetim" bağlantısı yoktur; admin paneline `admin.html`/`login.html`
+adresine doğrudan gidilerek ulaşılır.
+
+## Yasal sayfalar (şablon)
+
+`kvkk.html`, `mesafeli-satis-sozlesmesi.html`, `iade-ve-cayma-hakki.html` ve `cerez-politikasi.html` dosyaları
+Türkiye e-ticaret mevzuatına uygun **taslak** metinlerdir. Yayınlamadan önce köşeli parantez `[...]` içindeki
+şirket bilgilerini doldurun ve bir hukuk danışmanına onaylatın — bunlar hukuki tavsiye değildir.
+
 ## Gereksinimler
 
 - Node.js 22 veya 24
