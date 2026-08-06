@@ -15,7 +15,7 @@
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Filementor Studio — 3D Baskı Mağazası" />
   <meta name="twitter:description" content="Özel tasarım 3D baskı ürünleri ve baskı hizmetleri. Türkiye geneline hızlı ve güvenli teslimat." />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=7" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -357,11 +357,14 @@
 
   <aside class="ai-chat" id="ai-chat" aria-label="Filementor AI sohbet asistanı">
     <button class="ai-chat-toggle" id="ai-chat-toggle" type="button" aria-expanded="false" aria-controls="ai-chat-panel">
-      <span class="ai-chat-toggle-mark" aria-hidden="true">AI</span><span>Ürün danışmanı</span>
+      <span class="ai-chat-toggle-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2l1.35 4.65L18 8l-4.65 1.35L12 14l-1.35-4.65L6 8l4.65-1.35L12 2Zm6 11 .82 2.18L21 16l-2.18.82L18 19l-.82-2.18L15 16l2.18-.82L18 13ZM5 14l1.08 2.92L9 18l-2.92 1.08L5 22l-1.08-2.92L1 18l2.92-1.08L5 14Z"/></svg>
+      </span>
+      <span class="ai-chat-toggle-copy"><strong>Filementor AI</strong><small>Nasıl yardımcı olabilirim?</small></span>
     </button>
     <section class="ai-chat-panel" id="ai-chat-panel" aria-hidden="true">
       <header class="ai-chat-header">
-        <div><strong>Filementor AI</strong><span><i aria-hidden="true"></i> Çevrimiçi ürün danışmanı</span></div>
+        <div class="ai-chat-brand"><span class="ai-chat-brand-mark" aria-hidden="true">AI</span><div><strong>Filementor AI</strong><span><i aria-hidden="true"></i> Ürün danışmanı çevrimiçi</span></div></div>
         <button id="ai-chat-close" type="button" aria-label="Sohbeti kapat">×</button>
       </header>
       <div class="ai-chat-messages" id="ai-chat-messages" role="log" aria-live="polite">
