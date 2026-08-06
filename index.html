@@ -355,9 +355,34 @@
   <!-- ══════════════ TOAST ══════════════ -->
   <div class="toast" id="toast"></div>
 
+  <aside class="ai-chat" id="ai-chat" aria-label="Filementor AI sohbet asistanı">
+    <button class="ai-chat-toggle" id="ai-chat-toggle" type="button" aria-expanded="false" aria-controls="ai-chat-panel">
+      <span class="ai-chat-toggle-mark" aria-hidden="true">AI</span><span>Ürün danışmanı</span>
+    </button>
+    <section class="ai-chat-panel" id="ai-chat-panel" aria-hidden="true">
+      <header class="ai-chat-header">
+        <div><strong>Filementor AI</strong><span><i aria-hidden="true"></i> Çevrimiçi ürün danışmanı</span></div>
+        <button id="ai-chat-close" type="button" aria-label="Sohbeti kapat">×</button>
+      </header>
+      <div class="ai-chat-messages" id="ai-chat-messages" role="log" aria-live="polite">
+        <div class="ai-message ai-message-assistant">Merhaba! Ürünlerimiz ve 3D baskı seçenekleri hakkında yardımcı olabilirim. Ne arıyorsunuz?</div>
+      </div>
+      <div class="ai-chat-suggestions" id="ai-chat-suggestions">
+        <button type="button">Hediye öner</button><button type="button">Özel baskı yapılır mı?</button>
+      </div>
+      <form class="ai-chat-form" id="ai-chat-form">
+        <label class="sr-only" for="ai-chat-input">Mesajınız</label>
+        <textarea id="ai-chat-input" maxlength="600" rows="1" placeholder="Bir ürün sorun…" required></textarea>
+        <button type="submit" aria-label="Mesajı gönder">Gönder</button>
+      </form>
+      <p class="ai-chat-note">AI yanıtları hata içerebilir. Ödeme veya kişisel bilgi paylaşmayın.</p>
+    </section>
+  </aside>
+
   <script src="js/api-config.js?v=3"></script>
   <script src="js/products.js?v=3"></script>
   <script src="js/store.js?v=5"></script>
   <script src="js/payment.js?v=4"></script>
+  <script src="js/filementor-ai.js?v=1"></script>
 </body>
 </html>

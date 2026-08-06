@@ -71,6 +71,12 @@ Her production deploy öncesinde ilk iki komut zorunludur. Ayrıntılı canlıya
 
 Yerelde sandbox anahtarlarını yalnızca `.dev.vars` içinde `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` ve `IYZICO_ENVIRONMENT=sandbox` olarak tanımlayın. Production anahtarları Cloudflare secret olarak saklanmalıdır.
 
+## Filementor AI
+
+Ana sayfadaki Filementor AI ürün danışmanı, Cloudflare Workers AI üzerinden çalışır ve her yanıtta D1'daki güncel aktif ürünleri bağlam olarak kullanır. Tarayıcı doğrudan model sağlayıcısına bağlanmaz.
+
+`wrangler.jsonc` içindeki `AI` binding'i dağıtım sırasında kullanılır. Model, secret olmayan `AI_MODEL` değişkeniyle değiştirilebilir. AI inference uzak Cloudflare altyapısında çalışır ve kullanım Cloudflare hesabına yansır.
+
 İletişim formu `POST /api/contact` üzerinden Cloudflare Email Sending binding'ini kullanır. Canlıya almadan önce `filementorstudio.net` alanını Cloudflare Email Sending'e dahil edin ve `wrangler.jsonc` içindeki `EMAIL` binding'inin oluştuğunu doğrulayın. Gönderen ve alıcı adresleri `CONTACT_FROM_EMAIL` ile `CONTACT_TO_EMAIL` değişkenlerinden okunur; e-posta API anahtarı kaynak kodda tutulmaz.
 
 ## Güvenlik notu
