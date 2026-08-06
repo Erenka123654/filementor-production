@@ -16,7 +16,7 @@
     "db:local": "wrangler d1 migrations apply filementor-db --local",
     "db:remote": "wrangler d1 migrations apply filementor-db --remote",
     "audit": "npm audit --omit=dev",
-    "check": "node --check src/worker.js && node --check js/products.js && node --check js/store.js && node --check js/admin.js && node --check js/admin-guard.js && node --check js/payment.js && node --check js/login.js && node --check js/register.js && node --check js/cookie-consent.js && node scripts/security-check.js",
+    "check": "node --check src/worker.js && node --check js/products.js && node --check js/store.js && node --check js/filementor-ai.js && node --check js/admin.js && node --check js/admin-guard.js && node --check js/payment.js && node --check js/login.js && node --check js/register.js && node --check js/cookie-consent.js && node scripts/security-check.js",
     "types": "wrangler types ./src/worker-configuration.d.ts"
   },
   "devDependencies": {

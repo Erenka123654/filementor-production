@@ -7,6 +7,7 @@
   "keep_vars": true,
   "vars": {
     "IYZICO_ENVIRONMENT": "sandbox",
+    "AI_MODEL": "@cf/meta/llama-3.1-8b-instruct-fast",
     "CONTACT_FROM_EMAIL": "noreply@mail.filementorstudio.net",
     "CONTACT_TO_EMAIL": "info@filementorstudio.net"
   },
@@ -23,23 +24,17 @@
     "logs": { "head_sampling_rate": 1 }
   },
 
+  "ai": {
+    "binding": "AI",
+    "remote": true
+  },
+
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "filementor-db",
       "database_id": "d75a99db-baec-4478-997a-a0b6e795ea66",
       "migrations_dir": "migrations"
-    }
-  ],
-
-  "ai": {
-    "binding": "AI"
-  },
-
-  "vectorize": [
-    {
-      "binding": "VECTORIZE",
-      "index_name": "filementor-knowledge"
     }
   ],
 

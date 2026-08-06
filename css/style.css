@@ -427,6 +427,33 @@ body {
 .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(8px); background: var(--ink); color: #fff; padding: 12px 24px; border-radius: var(--radius); font-size: 14px; font-weight: 600; white-space: nowrap; z-index: 300; opacity: 0; transition: all .25s; pointer-events: none; box-shadow: var(--shadow-lg); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── FILEMENTOR AI ── */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.ai-chat { position: fixed; right: 22px; bottom: 22px; z-index: 280; font-family: var(--font); }
+.ai-chat-toggle { display: flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; padding: 10px 16px 10px 10px; background: var(--ink); color: #fff; box-shadow: var(--shadow-lg); cursor: pointer; font-weight: 700; }
+.ai-chat-toggle-mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--filament); font: 700 11px var(--font-mono); }
+.ai-chat-panel { position: absolute; right: 0; bottom: 60px; width: min(380px, calc(100vw - 28px)); height: min(570px, calc(100vh - 110px)); display: none; grid-template-rows: auto 1fr auto auto auto; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--card); box-shadow: var(--shadow-lg); }
+.ai-chat.open .ai-chat-panel { display: grid; animation: aiChatIn .2s ease-out; }
+.ai-chat.open .ai-chat-toggle { display: none; }
+@keyframes aiChatIn { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+.ai-chat-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; background: var(--ink); color: #fff; }
+.ai-chat-header strong { display: block; font-family: var(--font-display); font-size: 13px; }
+.ai-chat-header span { display: flex; align-items: center; gap: 6px; margin-top: 3px; color: rgba(255,255,255,.68); font-size: 11px; }
+.ai-chat-header i { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
+.ai-chat-header button { border: 0; background: transparent; color: #fff; font-size: 27px; line-height: 1; cursor: pointer; }
+.ai-chat-messages { overflow-y: auto; padding: 18px; background: var(--surface); }
+.ai-message { width: fit-content; max-width: 88%; margin-bottom: 10px; padding: 10px 13px; border-radius: 13px; font-size: 14px; line-height: 1.45; white-space: pre-wrap; }
+.ai-message-assistant { background: var(--card); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.ai-message-user { margin-left: auto; background: var(--filament); color: #fff; border-bottom-right-radius: 4px; }
+.ai-message-loading { color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+.ai-chat-suggestions { display: flex; gap: 6px; overflow-x: auto; padding: 9px 12px 0; }
+.ai-chat-suggestions button { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 999px; background: var(--card); padding: 6px 10px; color: var(--muted); cursor: pointer; font-size: 11px; }
+.ai-chat-form { display: flex; gap: 8px; padding: 10px 12px; }
+.ai-chat-form textarea { flex: 1; min-height: 42px; max-height: 90px; resize: none; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 10px 11px; font: 14px var(--font); }
+.ai-chat-form button { align-self: stretch; border: 0; border-radius: var(--radius); padding: 0 13px; background: var(--ink); color: #fff; font-weight: 700; cursor: pointer; }
+.ai-chat-form button:disabled { opacity: .55; cursor: wait; }
+.ai-chat-note { padding: 0 12px 10px; color: var(--muted-2); font-size: 9px; text-align: center; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .hero-inner { grid-template-columns: 1fr; }
@@ -446,4 +473,6 @@ body {
   .lightbox-img-wrap { min-height: 240px; }
   .pay-modal { max-width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; top: auto; bottom: 0; left: 0; right: 0; transform: translateY(20px); max-height: 95vh; }
   .pay-modal.open { transform: translateY(0); }
+  .ai-chat { right: 14px; bottom: 14px; }
+  .ai-chat-panel { position: fixed; inset: 14px; width: auto; height: auto; }
 }
