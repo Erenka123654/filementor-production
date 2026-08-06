@@ -32,6 +32,17 @@
     }
   ],
 
+  "ai": {
+    "binding": "AI"
+  },
+
+  "vectorize": [
+    {
+      "binding": "VECTORIZE",
+      "index_name": "filementor-knowledge"
+    }
+  ],
+
   "routes": [
     {
       "pattern": "api.filementorstudio.net",
