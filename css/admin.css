@@ -329,3 +329,8 @@
   text-align: left;
   cursor: pointer;
 }
+
+/* --- Utility classes (replace inline style="" attributes for CSP compliance) --- */
+.hidden { display: none; }
+.u-note-muted { font-size: 13px; opacity: .65; margin-top: -8px; }
+.u-label-hint { font-weight: 400; color: #aaa; }

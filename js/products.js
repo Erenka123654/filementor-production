@@ -1,12 +1,9 @@
 /* ═══════════════════════════════════════════
    products.js — Ürün Veri Yönetimi
-   Sunucu (data/products.json) üzerinden kalıcı saklama
+   API: Cloudflare Workers (src/worker.js) + D1
    image: base64 string veya null
    ═══════════════════════════════════════════ */
 
-// Backend başka bir domain'deyse (örn. frontend GitHub Pages'te,
-// backend Render'da ise) burayı backend adresinle doldur:
-// const API_BASE = "https://filementor.onrender.com";
 const API_BASE = window.FILEMENTOR_API_BASE || "";
 
 const EMOJIS = ['🏺','🪴','💡','⚙️','🎮','🔧','🐾','🌸','🦕','🚀','♟️','🎭','🔑','🌙','🎲','🏠','🎨','🌿','🍃','🦋','🏆','🎪','🔮','🌺'];

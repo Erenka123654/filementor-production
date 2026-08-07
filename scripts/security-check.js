@@ -14,7 +14,18 @@ const forbidden = [
   { pattern: /\beval\s*\(/, message: 'eval call' },
   { pattern: /document\.write\s*\(/, message: 'document.write call' },
 ];
+const noInlineStyleFiles = [
+  'index.html', 'login.html', 'register.html', 'admin.html',
+  'kvkk.html', 'cerez-politikasi.html', 'iade-ve-cayma-hakki.html', 'mesafeli-satis-sozlesmesi.html',
+];
 const failures = [];
+
+for (const relative of noInlineStyleFiles) {
+  const contents = fs.readFileSync(path.join(root, relative), 'utf8');
+  if (/\sstyle\s*=\s*["']/.test(contents)) failures.push(`${relative}: inline style="" attribute (CSP style-src must stay free of 'unsafe-inline')`);
+  if (/<style[\s>]/.test(contents)) failures.push(`${relative}: inline <style> block (CSP style-src must stay free of 'unsafe-inline')`);
+}
+
 
 for (const relative of sourceFiles) {
   const contents = fs.readFileSync(path.join(root, relative), 'utf8');

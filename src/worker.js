@@ -5,6 +5,28 @@ const ALLOWED_ORIGINS = new Set([
   "http://127.0.0.1:8080",
 ]);
 
+// Applied to every response the Worker returns (success, error, and OPTIONS
+// paths) so security scanners don't find endpoints where these are missing.
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer",
+  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+};
+
+// order.id in the redirect below is a crypto.randomUUID() value with no
+// endpoint that resolves order details from the id alone, so it isn't an
+// enumerable/sensitive credential — but we still keep it out of response
+// headers besides Location and apply the same hardening as every other
+// response so scanners don't flag this path as an exception.
+function paymentRedirect(url) {
+  return new Response(null, {
+    status: 303,
+    headers: { Location: url, ...SECURITY_HEADERS, "Cache-Control": "no-store" },
+  });
+}
+
 function getCorsHeaders(request) {
   const origin = request.headers.get("Origin");
 
@@ -28,9 +50,7 @@ function jsonResponse(request, data, status = 200) {
     headers: {
       "Content-Type": "application/json; charset=UTF-8",
       "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
-      "Referrer-Policy": "no-referrer",
+      ...SECURITY_HEADERS,
       ...getCorsHeaders(request),
     },
   });
@@ -432,7 +452,7 @@ export default {
 
       return new Response(null, {
         status: 204,
-        headers: getCorsHeaders(request),
+        headers: { ...SECURITY_HEADERS, ...getCorsHeaders(request) },
       });
     }
 
@@ -664,12 +684,12 @@ export default {
         const frontendUrl = new URL("https://filementorstudio.net/");
         if (!token || token.length > 200) {
           frontendUrl.searchParams.set("payment", "failed");
-          return Response.redirect(frontendUrl.toString(), 303);
+          return paymentRedirect(frontendUrl.toString());
         }
         const order = await env.DB.prepare("SELECT id, amount_cents, status, items_json FROM orders WHERE iyzico_token = ?").bind(token).first();
         if (!order) {
           frontendUrl.searchParams.set("payment", "failed");
-          return Response.redirect(frontendUrl.toString(), 303);
+          return paymentRedirect(frontendUrl.toString());
         }
         const result = await iyzicoRequest(env, "/payment/iyzipos/checkoutform/auth/ecom/detail", {
           locale: "tr", conversationId: order.id, token,
@@ -706,7 +726,7 @@ export default {
         }
         frontendUrl.searchParams.set("payment", verified ? "success" : "failed");
         frontendUrl.searchParams.set("order", order.id);
-        return Response.redirect(frontendUrl.toString(), 303);
+        return paymentRedirect(frontendUrl.toString());
       }
 
       if (path === "/api/health" && request.method === "GET") {
@@ -981,7 +1001,9 @@ export default {
         );
 
         headers.set("Cache-Control", "no-store");
-        headers.set("X-Content-Type-Options", "nosniff");
+        Object.entries(SECURITY_HEADERS).forEach(
+          ([key, value]) => headers.set(key, value)
+        );
 
         return new Response(error.body, {
           status: error.status,
