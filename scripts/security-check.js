@@ -43,6 +43,16 @@ const worker = fs.readFileSync(path.join(root, 'src/worker.js'), 'utf8');
 if (/Access-Control-Allow-Origin[\s\S]{0,80}["']\*["']/.test(worker)) {
   failures.push('src/worker.js: wildcard production CORS');
 }
+const productionOrigins = worker.match(/const ALLOWED_ORIGINS = new Set\(\[([\s\S]*?)\]\);/)?.[1] || '';
+if (/localhost|127\.0\.0\.1/.test(productionOrigins)) {
+  failures.push('src/worker.js: local origin included in the production CORS allowlist');
+}
+if (/searchParams\.set\(["']order["']/.test(worker)) {
+  failures.push('src/worker.js: order identifier exposed in a redirect URL');
+}
+if (!/Strict-Transport-Security/.test(worker)) {
+  failures.push('src/worker.js: HSTS response header missing');
+}
 
 if (failures.length) {
   console.error(`Security check failed:\n- ${failures.join('\n- ')}`);

@@ -1,6 +1,8 @@
 const ALLOWED_ORIGINS = new Set([
   "https://filementorstudio.net",
   "https://www.filementorstudio.net",
+]);
+const LOCAL_ORIGINS = new Set([
   "http://localhost:8080",
   "http://127.0.0.1:8080",
 ]);
@@ -13,13 +15,10 @@ const SECURITY_HEADERS = {
   "Referrer-Policy": "no-referrer",
   "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
 };
 
-// order.id in the redirect below is a crypto.randomUUID() value with no
-// endpoint that resolves order details from the id alone, so it isn't an
-// enumerable/sensitive credential — but we still keep it out of response
-// headers besides Location and apply the same hardening as every other
-// response so scanners don't flag this path as an exception.
+// Keep payment results and identifiers out of caches and referrer data.
 function paymentRedirect(url) {
   return new Response(null, {
     status: 303,
@@ -30,7 +29,7 @@ function paymentRedirect(url) {
 function getCorsHeaders(request) {
   const origin = request.headers.get("Origin");
 
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+  if (!isAllowedOrigin(request)) {
     return {};
   }
 
@@ -42,6 +41,16 @@ function getCorsHeaders(request) {
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin",
   };
+}
+
+function isAllowedOrigin(request) {
+  const origin = request.headers.get("Origin");
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+
+  const hostname = new URL(request.url).hostname;
+  const localWorker = hostname === "localhost" || hostname === "127.0.0.1";
+  return localWorker && LOCAL_ORIGINS.has(origin);
 }
 
 function jsonResponse(request, data, status = 200) {
@@ -310,7 +319,7 @@ function formatProductContext(products) {
 }
 
 async function answerAiChat(request, env) {
-  if (!ALLOWED_ORIGINS.has(request.headers.get("Origin"))) {
+  if (!isAllowedOrigin(request)) {
     return jsonResponse(request, { error: "İstek kaynağı reddedildi." }, 403);
   }
   if (!env.AI) return jsonResponse(request, { error: "Yapay zekâ servisi henüz yapılandırılmadı." }, 503);
@@ -442,7 +451,7 @@ export default {
     if (request.method === "OPTIONS") {
       const origin = request.headers.get("Origin");
 
-      if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+      if (!origin || !isAllowedOrigin(request)) {
         return jsonResponse(
           request,
           { error: "Origin izinli değil." },
@@ -464,7 +473,7 @@ export default {
       if (
         path.startsWith("/api/admin/") &&
         ["POST", "PUT", "DELETE"].includes(request.method) &&
-        !ALLOWED_ORIGINS.has(request.headers.get("Origin"))
+        !isAllowedOrigin(request)
       ) {
         return jsonResponse(request, { error: "İstek kaynağı reddedildi." }, 403);
       }
@@ -725,7 +734,6 @@ export default {
           `).bind(order.id).run();
         }
         frontendUrl.searchParams.set("payment", verified ? "success" : "failed");
-        frontendUrl.searchParams.set("order", order.id);
         return paymentRedirect(frontendUrl.toString());
       }
 
@@ -737,7 +745,7 @@ export default {
       }
 
       if (path === "/api/contact" && request.method === "POST") {
-        if (!ALLOWED_ORIGINS.has(request.headers.get("Origin"))) {
+        if (!isAllowedOrigin(request)) {
           return jsonResponse(request, { error: "İstek kaynağı reddedildi." }, 403);
         }
         const contact = await readJsonBody(request);
