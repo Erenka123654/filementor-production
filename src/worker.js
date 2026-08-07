@@ -1,14 +1,35 @@
 const ALLOWED_ORIGINS = new Set([
   "https://filementorstudio.net",
   "https://www.filementorstudio.net",
+]);
+const LOCAL_ORIGINS = new Set([
   "http://localhost:8080",
   "http://127.0.0.1:8080",
 ]);
 
+// Applied to every response the Worker returns (success, error, and OPTIONS
+// paths) so security scanners don't find endpoints where these are missing.
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "no-referrer",
+  "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+};
+
+// Keep payment results and identifiers out of caches and referrer data.
+function paymentRedirect(url) {
+  return new Response(null, {
+    status: 303,
+    headers: { Location: url, ...SECURITY_HEADERS, "Cache-Control": "no-store" },
+  });
+}
+
 function getCorsHeaders(request) {
   const origin = request.headers.get("Origin");
 
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+  if (!isAllowedOrigin(request)) {
     return {};
   }
 
@@ -22,15 +43,23 @@ function getCorsHeaders(request) {
   };
 }
 
+function isAllowedOrigin(request) {
+  const origin = request.headers.get("Origin");
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+
+  const hostname = new URL(request.url).hostname;
+  const localWorker = hostname === "localhost" || hostname === "127.0.0.1";
+  return localWorker && LOCAL_ORIGINS.has(origin);
+}
+
 function jsonResponse(request, data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: {
       "Content-Type": "application/json; charset=UTF-8",
       "Cache-Control": "no-store",
-      "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
-      "Referrer-Policy": "no-referrer",
+      ...SECURITY_HEADERS,
       ...getCorsHeaders(request),
     },
   });
@@ -290,7 +319,7 @@ function formatProductContext(products) {
 }
 
 async function answerAiChat(request, env) {
-  if (!ALLOWED_ORIGINS.has(request.headers.get("Origin"))) {
+  if (!isAllowedOrigin(request)) {
     return jsonResponse(request, { error: "İstek kaynağı reddedildi." }, 403);
   }
   if (!env.AI) return jsonResponse(request, { error: "Yapay zekâ servisi henüz yapılandırılmadı." }, 503);
@@ -422,7 +451,7 @@ export default {
     if (request.method === "OPTIONS") {
       const origin = request.headers.get("Origin");
 
-      if (!origin || !ALLOWED_ORIGINS.has(origin)) {
+      if (!origin || !isAllowedOrigin(request)) {
         return jsonResponse(
           request,
           { error: "Origin izinli değil." },
@@ -432,7 +461,7 @@ export default {
 
       return new Response(null, {
         status: 204,
-        headers: getCorsHeaders(request),
+        headers: { ...SECURITY_HEADERS, ...getCorsHeaders(request) },
       });
     }
 
@@ -444,7 +473,7 @@ export default {
       if (
         path.startsWith("/api/admin/") &&
         ["POST", "PUT", "DELETE"].includes(request.method) &&
-        !ALLOWED_ORIGINS.has(request.headers.get("Origin"))
+        !isAllowedOrigin(request)
       ) {
         return jsonResponse(request, { error: "İstek kaynağı reddedildi." }, 403);
       }
@@ -664,12 +693,12 @@ export default {
         const frontendUrl = new URL("https://filementorstudio.net/");
         if (!token || token.length > 200) {
           frontendUrl.searchParams.set("payment", "failed");
-          return Response.redirect(frontendUrl.toString(), 303);
+          return paymentRedirect(frontendUrl.toString());
         }
         const order = await env.DB.prepare("SELECT id, amount_cents, status, items_json FROM orders WHERE iyzico_token = ?").bind(token).first();
         if (!order) {
           frontendUrl.searchParams.set("payment", "failed");
-          return Response.redirect(frontendUrl.toString(), 303);
+          return paymentRedirect(frontendUrl.toString());
         }
         const result = await iyzicoRequest(env, "/payment/iyzipos/checkoutform/auth/ecom/detail", {
           locale: "tr", conversationId: order.id, token,
@@ -705,8 +734,7 @@ export default {
           `).bind(order.id).run();
         }
         frontendUrl.searchParams.set("payment", verified ? "success" : "failed");
-        frontendUrl.searchParams.set("order", order.id);
-        return Response.redirect(frontendUrl.toString(), 303);
+        return paymentRedirect(frontendUrl.toString());
       }
 
       if (path === "/api/health" && request.method === "GET") {
@@ -717,7 +745,7 @@ export default {
       }
 
       if (path === "/api/contact" && request.method === "POST") {
-        if (!ALLOWED_ORIGINS.has(request.headers.get("Origin"))) {
+        if (!isAllowedOrigin(request)) {
           return jsonResponse(request, { error: "İstek kaynağı reddedildi." }, 403);
         }
         const contact = await readJsonBody(request);
@@ -981,7 +1009,9 @@ export default {
         );
 
         headers.set("Cache-Control", "no-store");
-        headers.set("X-Content-Type-Options", "nosniff");
+        Object.entries(SECURITY_HEADERS).forEach(
+          ([key, value]) => headers.set(key, value)
+        );
 
         return new Response(error.body, {
           status: error.status,

@@ -70,18 +70,18 @@
               </clipPath>
             </defs>
             <g clip-path="url(#lampClip)">
-              <rect class="layer-rect" x="70" y="225" width="140" height="8"  style="animation-delay:0s"/>
-              <rect class="layer-rect" x="70" y="216" width="140" height="8"  style="animation-delay:.12s"/>
-              <rect class="layer-rect" x="70" y="200" width="140" height="8"  style="animation-delay:.28s"/>
-              <rect class="layer-rect" x="70" y="184" width="140" height="8"  style="animation-delay:.42s"/>
-              <rect class="layer-rect" x="70" y="168" width="140" height="8"  style="animation-delay:.56s"/>
-              <rect class="layer-rect" x="70" y="152" width="140" height="8"  style="animation-delay:.7s"/>
-              <rect class="layer-rect" x="70" y="136" width="140" height="8"  style="animation-delay:.86s"/>
-              <rect class="layer-rect" x="70" y="120" width="140" height="8"  style="animation-delay:1s"/>
-              <rect class="layer-rect" x="70" y="104" width="140" height="8"  style="animation-delay:1.16s"/>
-              <rect class="layer-rect" x="70" y="88"  width="140" height="8"  style="animation-delay:1.3s"/>
-              <rect class="layer-rect" x="70" y="72"  width="140" height="8"  style="animation-delay:1.46s"/>
-              <rect class="layer-rect" x="70" y="56"  width="140" height="8"  style="animation-delay:1.6s"/>
+              <rect class="layer-rect layer-rect-0" x="70" y="225" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-1" x="70" y="216" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-2" x="70" y="200" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-3" x="70" y="184" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-4" x="70" y="168" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-5" x="70" y="152" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-6" x="70" y="136" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-7" x="70" y="120" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-8" x="70" y="104" width="140" height="8"/>
+              <rect class="layer-rect layer-rect-9" x="70" y="88"  width="140" height="8"/>
+              <rect class="layer-rect layer-rect-10" x="70" y="72"  width="140" height="8"/>
+              <rect class="layer-rect layer-rect-11" x="70" y="56"  width="140" height="8"/>
             </g>
             <path class="outline-path" d="M 90 60 C 90 40, 190 40, 190 60 L 205 150 C 205 165, 75 165, 75 150 Z M 120 165 L 160 165 L 160 220 L 120 220 Z M 100 220 L 180 220 L 180 232 L 100 232 Z" />
             <circle class="nozzle-dot" r="4" />
@@ -171,13 +171,13 @@
     <div class="container footer-inner">
       <span class="logo-text">Filementor<strong>Studio</strong></span>
       <p class="footer-copy">© 2026 Filementor Studio. Tüm hakları saklıdır.</p>
-      <p class="footer-copy" style="margin-top:6px; font-size:11px;">
-        <a href="kvkk.html" style="opacity:.7;">KVKK Aydınlatma Metni</a> ·
-        <a href="mesafeli-satis-sozlesmesi.html" style="opacity:.7;">Mesafeli Satış Sözleşmesi</a> ·
-        <a href="iade-ve-cayma-hakki.html" style="opacity:.7;">İade ve Cayma Hakkı</a> ·
-        <a href="cerez-politikasi.html" style="opacity:.7;">Çerez Politikası</a>
+      <p class="footer-copy u-footer-copy-top">
+        <a href="kvkk.html" class="u-link-muted">KVKK Aydınlatma Metni</a> ·
+        <a href="mesafeli-satis-sozlesmesi.html" class="u-link-muted">Mesafeli Satış Sözleşmesi</a> ·
+        <a href="iade-ve-cayma-hakki.html" class="u-link-muted">İade ve Cayma Hakkı</a> ·
+        <a href="cerez-politikasi.html" class="u-link-muted">Çerez Politikası</a>
       </p>
-      <p class="footer-copy" style="margin-top:4px; font-size:11px; opacity:.5">Ödeme altyapısı: iyzico · SSL Güvenli</p>
+      <p class="footer-copy u-footer-copy-top-sm">Ödeme altyapısı: iyzico · SSL Güvenli</p>
     </div>
   </footer>
   <script src="js/cookie-consent.js" defer></script>
@@ -192,12 +192,12 @@
     <div class="cart-items" id="cart-items">
       <p class="cart-empty">Sepetiniz boş.</p>
     </div>
-    <div class="cart-footer" id="cart-footer" style="display:none">
+    <div class="cart-footer hidden" id="cart-footer">
       <div class="cart-total-row">
         <span>Ara Toplam</span><span id="cart-subtotal">₺0</span>
       </div>
       <div class="cart-total-row">
-        <span>Kargo</span><span style="color:var(--filament-deep);font-weight:600">Ücretsiz</span>
+        <span>Kargo</span><span class="u-shipping-free">Ücretsiz</span>
       </div>
       <div class="cart-total-row grand">
         <span>Toplam</span><strong id="cart-total">₺0</strong>
@@ -265,7 +265,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Adres *</label>
-        <textarea class="form-input form-textarea" id="pay-address" maxlength="300" autocomplete="street-address" placeholder="Teslimat adresi..." style="min-height:80px"></textarea>
+        <textarea class="form-input form-textarea u-min-h-80" id="pay-address" maxlength="300" autocomplete="street-address" placeholder="Teslimat adresi..."></textarea>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -285,7 +285,7 @@
     </div>
 
     <!-- Adım 2: Kart Bilgileri -->
-    <div class="pay-step" id="step-2" style="display:none">
+    <div class="pay-step hidden" id="step-2">
       <div class="step-indicator">
         <span class="step done">✓</span><span class="step-line active"></span>
         <span class="step active">2</span><span class="step-line"></span>
@@ -307,7 +307,7 @@
       <p class="order-note">Kart bilgileriniz Filementor tarafından alınmaz. Ödeme sırasında iyzico'nun güvenli sayfasına yönlendirilirsiniz.</p>
 
       <div class="installment-box">
-        <p class="form-label" style="margin-bottom:8px">Taksit Seçeneği</p>
+        <p class="form-label u-mb-8">Taksit Seçeneği</p>
         <div class="installment-opts" id="installment-opts"></div>
       </div>
 
@@ -317,14 +317,14 @@
         <span class="secure-badge">💳 3D Secure</span>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:1rem">
-        <button class="btn btn-ghost" id="step2-back-btn" style="flex:0 0 auto">← Geri</button>
+      <div class="u-flex-gap-mt">
+        <button class="btn btn-ghost u-flex-shrink-0" id="step2-back-btn">← Geri</button>
         <button class="btn btn-primary btn-full" id="step2-next-btn">Siparişi Onayla →</button>
       </div>
     </div>
 
     <!-- Adım 3: Onay -->
-    <div class="pay-step" id="step-3" style="display:none">
+    <div class="pay-step hidden" id="step-3">
       <div class="step-indicator">
         <span class="step done">✓</span><span class="step-line active"></span>
         <span class="step done">✓</span><span class="step-line active"></span>
@@ -343,7 +343,7 @@
     </div>
 
     <!-- Adım 4: Başarı -->
-    <div class="pay-step" id="step-success" style="display:none">
+    <div class="pay-step hidden" id="step-success">
       <div class="success-anim">✅</div>
       <h3 class="success-title">Ödeme Başarılı!</h3>
       <p class="success-sub">Siparişiniz alındı. E-posta adresinize onay gönderildi.</p>

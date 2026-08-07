@@ -485,3 +485,26 @@ body {
   .ai-chat-toggle-copy { display: none; }
   .ai-chat-panel { position: fixed; inset: 14px; width: auto; height: auto; }
 }
+/* --- Utility classes (replace inline style="" attributes for CSP compliance) --- */
+.hidden { display: none; }
+.u-flex-gap-mt { display: flex; gap: 10px; margin-top: 1rem; }
+.u-flex-shrink-0 { flex: 0 0 auto; }
+.u-min-h-80 { min-height: 80px; }
+.u-mb-8 { margin-bottom: 8px; }
+.u-footer-copy-top { margin-top: 6px; font-size: 11px; }
+.u-footer-copy-top-sm { margin-top: 4px; font-size: 11px; opacity: .5; }
+.u-link-muted { opacity: .7; }
+.u-shipping-free { color: var(--filament-deep); font-weight: 600; }
+.layer-rect-0  { animation-delay: 0s; }
+.layer-rect-1  { animation-delay: .12s; }
+.layer-rect-2  { animation-delay: .28s; }
+.layer-rect-3  { animation-delay: .42s; }
+.layer-rect-4  { animation-delay: .56s; }
+.layer-rect-5  { animation-delay: .7s; }
+.layer-rect-6  { animation-delay: .86s; }
+.layer-rect-7  { animation-delay: 1s; }
+.layer-rect-8  { animation-delay: 1.16s; }
+.layer-rect-9  { animation-delay: 1.3s; }
+.layer-rect-10 { animation-delay: 1.46s; }
+.layer-rect-11 { animation-delay: 1.6s; }
+.u-legal-container { max-width: 820px; margin: 40px auto; padding: 0 20px; line-height: 1.7; }
