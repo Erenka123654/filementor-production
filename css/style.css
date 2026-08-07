@@ -485,6 +485,7 @@ body {
   .ai-chat-toggle-copy { display: none; }
   .ai-chat-panel { position: fixed; inset: 14px; width: auto; height: auto; }
 }
+
 /* --- Utility classes (replace inline style="" attributes for CSP compliance) --- */
 .hidden { display: none; }
 .u-flex-gap-mt { display: flex; gap: 10px; margin-top: 1rem; }
