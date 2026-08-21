@@ -26,7 +26,7 @@ function productVisual(product, size) {
 function showSection(name) {
   ['dashboard', 'products', 'orders', 'users'].forEach(section => {
     const el = document.getElementById(`section-${section}`);
-    if (el) el.style.display = section === name ? '' : 'none';
+    if (el) el.classList.toggle('hidden', section !== name);
   });
   document.querySelectorAll('.sidebar-link').forEach(link => link.classList.toggle('active', link.dataset.section === name));
   setText('section-title', { dashboard: 'Dashboard', products: 'Ürünler', orders: 'Siparişler', users: 'Kullanıcılar' }[name] || name);
