@@ -31,7 +31,7 @@ function showSection(name) {
   document.querySelectorAll('.sidebar-link').forEach(link => link.classList.toggle('active', link.dataset.section === name));
   setText('section-title', { dashboard: 'Dashboard', products: 'Ürünler', orders: 'Siparişler', users: 'Kullanıcılar' }[name] || name);
   const addButton = document.getElementById('add-btn');
-  if (addButton) addButton.style.display = name === 'products' ? '' : 'none';
+  if (addButton) addButton.classList.toggle('hidden', name !== 'products');
   currentSection = name;
   if (name === 'dashboard') renderDashboard();
   if (name === 'products') renderProductsTable();
@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const session = window.__ADMIN_READY ? await window.__ADMIN_READY : null;
   if (session && session.role === 'owner') {
     const usersLink = document.getElementById('users-nav-link');
-    if (usersLink) usersLink.style.display = '';
+    if (usersLink) usersLink.classList.remove('hidden');
   }
 
   await fetchProducts(); showSection('dashboard');
