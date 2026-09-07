@@ -429,7 +429,7 @@ body {
 
 /* ── FILEMENTOR AI ── */
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-.ai-chat { position: fixed; right: 24px; bottom: 24px; z-index: 280; font-family: var(--font); }
+.ai-chat { position: fixed; left: 24px; bottom: 24px; z-index: 280; font-family: var(--font); }
 .ai-chat-toggle { display: flex; align-items: center; gap: 11px; min-width: 210px; border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 10px 15px 10px 10px; background: linear-gradient(145deg, #211f1a, #11100d); color: #fff; box-shadow: 0 16px 40px rgba(21,19,15,.28); cursor: pointer; text-align: left; transition: transform .18s, box-shadow .18s; }
 .ai-chat-toggle:hover { transform: translateY(-2px); box-shadow: 0 20px 48px rgba(21,19,15,.35); }
 .ai-chat-toggle-mark { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 13px; background: linear-gradient(145deg, #ff6a3d, var(--filament)); box-shadow: inset 0 1px rgba(255,255,255,.25), 0 6px 16px rgba(255,77,28,.28); }
@@ -437,7 +437,7 @@ body {
 .ai-chat-toggle-copy { display: grid; line-height: 1.2; }
 .ai-chat-toggle-copy strong { font-size: 13px; letter-spacing: .1px; }
 .ai-chat-toggle-copy small { margin-top: 4px; color: rgba(255,255,255,.62); font-size: 10px; font-weight: 500; }
-.ai-chat-panel { position: absolute; right: 0; bottom: 72px; width: min(390px, calc(100vw - 28px)); height: min(590px, calc(100vh - 120px)); display: none; grid-template-rows: auto 1fr auto auto auto; overflow: hidden; border: 1px solid rgba(21,19,15,.12); border-radius: 22px; background: var(--card); box-shadow: 0 28px 75px rgba(21,19,15,.26); }
+.ai-chat-panel { position: absolute; left: 0; bottom: 72px; width: min(390px, calc(100vw - 28px)); height: min(590px, calc(100vh - 120px)); display: none; grid-template-rows: auto 1fr auto auto auto; overflow: hidden; border: 1px solid rgba(21,19,15,.12); border-radius: 22px; background: var(--card); box-shadow: 0 28px 75px rgba(21,19,15,.26); }
 .ai-chat.open .ai-chat-panel { display: grid; animation: aiChatIn .2s ease-out; }
 .ai-chat.open .ai-chat-toggle { display: none; }
 @keyframes aiChatIn { from { opacity: 0; transform: translateY(8px) scale(.98); } }
@@ -480,7 +480,7 @@ body {
   .lightbox-img-wrap { min-height: 240px; }
   .pay-modal { max-width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; top: auto; bottom: 0; left: 0; right: 0; transform: translateY(20px); max-height: 95vh; }
   .pay-modal.open { transform: translateY(0); }
-  .ai-chat { right: 14px; bottom: 14px; }
+  .ai-chat { left: 14px; bottom: 14px; }
   .ai-chat-toggle { min-width: auto; border-radius: 15px; padding: 8px; }
   .ai-chat-toggle-copy { display: none; }
   .ai-chat-panel { position: fixed; inset: 14px; width: auto; height: auto; }
