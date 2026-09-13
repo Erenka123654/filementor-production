@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Paneli - Filementor</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css?v=2">
 </head>
 <body>
 
@@ -17,57 +17,151 @@
       </div>
 
       <ul class="nav-links">
-        <li class="nav-item">
-          <a href="#"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+        <li class="nav-item" data-view="dashboard">
+          <a href="#dashboard"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
         </li>
-        <li class="nav-item active">
-          <a href="#"><i class="fa-solid fa-box"></i> Ürünler</a>
+        <li class="nav-item active" data-view="products">
+          <a href="#products"><i class="fa-solid fa-box"></i> Ürünler</a>
         </li>
-        <li class="nav-item">
-          <a href="#"><i class="fa-solid fa-cart-shopping"></i> Siparişler</a>
+        <li class="nav-item" data-view="orders">
+          <a href="#orders"><i class="fa-solid fa-cart-shopping"></i> Siparişler</a>
         </li>
       </ul>
     </div>
 
     <div class="sidebar-footer">
+      <span id="adminWhoami"></span>
       <a href="/"><i class="fa-solid fa-arrow-left"></i> Mağazaya Dön</a>
-      <a href="/logout">Çıkış Yap</a>
+      <a href="#" id="btnLogout">Çıkış Yap</a>
     </div>
   </aside>
 
   <main class="main-content">
-    <h1 class="page-title">Ürünler</h1>
 
-    <div class="table-container">
-      <div class="table-top-bar">
-        <h2 class="table-title">Tüm Ürünler</h2>
-        
-        <div class="actions-bar">
-          <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="Ürün ara...">
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view">
+      <h1 class="page-title">Dashboard</h1>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-blue"><i class="fa-solid fa-box"></i></div>
+          <div>
+            <div class="stat-value" id="statProductCount">–</div>
+            <div class="stat-label">Toplam Ürün</div>
           </div>
-
-          <button type="button" id="btnOpenAddModal" class="btn-add-product">
-            <i class="fa-solid fa-plus"></i> Yeni Ürün Ekle
-          </button>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="stat-value" id="statOutOfStock">–</div>
+            <div class="stat-label">Stokta Yok</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-green"><i class="fa-solid fa-sack-dollar"></i></div>
+          <div>
+            <div class="stat-value" id="statRevenue">–</div>
+            <div class="stat-label">Ödenen Toplam Ciro</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon-purple"><i class="fa-solid fa-cart-shopping"></i></div>
+          <div>
+            <div class="stat-value" id="statPendingOrders">–</div>
+            <div class="stat-label">Bekleyen Sipariş</div>
+          </div>
         </div>
       </div>
 
-      <table class="product-table">
-        <thead>
-          <tr>
-            <th>Ürün</th>
-            <th>Kategori</th>
-            <th>Fiyat</th>
-            <th>Stok</th>
-            <th>Durum</th>
-            <th>İşlem</th>
-          </tr>
-        </thead>
-        <tbody id="productTableBody"></tbody>
-      </table>
-    </div>
+      <div class="table-container">
+        <div class="table-top-bar">
+          <h2 class="table-title">Son Siparişler</h2>
+        </div>
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Sipariş No</th>
+              <th>Müşteri</th>
+              <th>Tutar</th>
+              <th>Durum</th>
+              <th>Tarih</th>
+            </tr>
+          </thead>
+          <tbody id="recentOrdersBody"></tbody>
+        </table>
+        <p id="recentOrdersEmpty" class="empty-state" style="display:none;">Henüz sipariş yok.</p>
+      </div>
+    </section>
+
+    <!-- ÜRÜNLER -->
+    <section id="view-products" class="view active">
+      <h1 class="page-title">Ürünler</h1>
+
+      <div class="table-container">
+        <div class="table-top-bar">
+          <h2 class="table-title">Tüm Ürünler</h2>
+
+          <div class="actions-bar">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchInput" placeholder="Ürün ara...">
+            </div>
+
+            <button type="button" id="btnOpenAddModal" class="btn-add-product">
+              <i class="fa-solid fa-plus"></i> Yeni Ürün Ekle
+            </button>
+          </div>
+        </div>
+
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Ürün</th>
+              <th>Kategori</th>
+              <th>Fiyat</th>
+              <th>Stok</th>
+              <th>Durum</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody"></tbody>
+        </table>
+        <p id="productsEmpty" class="empty-state" style="display:none;">Ürün bulunamadı.</p>
+      </div>
+    </section>
+
+    <!-- SİPARİŞLER -->
+    <section id="view-orders" class="view">
+      <h1 class="page-title">Siparişler</h1>
+
+      <div class="table-container">
+        <div class="table-top-bar">
+          <h2 class="table-title">Tüm Siparişler</h2>
+          <div class="actions-bar">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="orderSearchInput" placeholder="Müşteri veya sipariş no ara...">
+            </div>
+          </div>
+        </div>
+
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Sipariş No</th>
+              <th>Müşteri</th>
+              <th>E-posta</th>
+              <th>Tutar</th>
+              <th>Durum</th>
+              <th>Tarih</th>
+            </tr>
+          </thead>
+          <tbody id="orderTableBody"></tbody>
+        </table>
+        <p id="ordersEmpty" class="empty-state" style="display:none;">Henüz sipariş yok.</p>
+      </div>
+    </section>
+
   </main>
 
   <div id="productModal" class="modal-overlay">
@@ -79,6 +173,7 @@
 
       <form id="productForm">
         <input type="hidden" id="editProductId" value="">
+        <input type="hidden" id="pImageData" value="">
 
         <div class="form-group">
           <label for="pName">Ürün Başlığı</label>
@@ -92,7 +187,7 @@
           </div>
           <div class="form-group">
             <label for="pPrice">Fiyat (₺)</label>
-            <input type="number" id="pPrice" placeholder="350" required min="0">
+            <input type="number" id="pPrice" placeholder="350" required min="0" step="0.01">
           </div>
         </div>
 
@@ -102,19 +197,40 @@
             <input type="number" id="pStock" value="1" required min="0">
           </div>
           <div class="form-group">
-            <label for="pImage">Görsel URL</label>
-            <input type="text" id="pImage" placeholder="https://..." required>
+            <label for="pStatus">Durum</label>
+            <select id="pStatus">
+              <option value="active">Satışta</option>
+              <option value="out">Stokta Yok</option>
+              <option value="draft">Taslak</option>
+            </select>
           </div>
         </div>
 
+        <div class="form-group">
+          <label for="pImageFile">Ürün Görseli</label>
+          <div class="image-upload-row">
+            <img id="pImagePreview" class="product-thumb image-preview" alt="Önizleme">
+            <label class="btn-upload" for="pImageFile">
+              <i class="fa-solid fa-upload"></i> Fotoğraf Yükle
+              <input type="file" id="pImageFile" accept="image/*" hidden>
+            </label>
+          </div>
+          <p id="imageUploadStatus" class="upload-status"></p>
+        </div>
+
+        <p id="formError" class="form-error"></p>
+
         <div class="modal-footer">
           <button type="button" id="btnCancelModal" class="btn-cancel">İptal</button>
-          <button type="submit" class="btn-submit">Kaydet</button>
+          <button type="submit" id="btnSubmitProduct" class="btn-submit">Kaydet</button>
         </div>
       </form>
     </div>
   </div>
 
-  <script src="js/admin.js"></script>
+  <script src="js/api-config.js?v=3"></script>
+  <script src="js/admin-guard.js?v=1"></script>
+  <script src="js/products.js?v=3"></script>
+  <script src="js/admin.js?v=2"></script>
 </body>
 </html>
