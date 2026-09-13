@@ -1,306 +1,471 @@
 'use strict';
 
-let editingId = null;
-let selectedEmoji = '📦';
-let pendingImage = null;
-let currentSection = 'dashboard';
+const state = {
+  products: [],
+  orders: [],
+  editingId: null,
+  imageData: ''
+};
 
-function node(tag, className, text) {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  if (text !== undefined) element.textContent = String(text);
-  return element;
+const API_BASE = window.FILEMENTOR_API_BASE || '';
+
+function byId(id) {
+  return document.getElementById(id);
 }
 
-function setText(id, value) { const el = document.getElementById(id); if (el) el.textContent = String(value); }
-function setValue(id, value) { const el = document.getElementById(id); if (el) el.value = value; }
-function statusLabel(status) { return { active: 'Satışta', out: 'Stok Yok', draft: 'Taslak' }[status] || status; }
-
-function productVisual(product, size) {
-  const visual = product.image ? document.createElement('img') : node('span', '', product.emoji || '📦');
-  if (product.image) { visual.src = product.image; visual.alt = product.name; }
-  Object.assign(visual.style, { width: `${size}px`, height: `${size}px`, objectFit: 'cover', borderRadius: '8px', flexShrink: '0' });
-  return visual;
+function createEl(tag, className, text) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text !== undefined) el.textContent = String(text);
+  return el;
 }
 
-function showSection(name) {
-  ['dashboard', 'products', 'orders', 'users'].forEach(section => {
-    const el = document.getElementById(`section-${section}`);
-    if (el) el.style.display = section === name ? '' : 'none';
+function moneyFromOrder(order) {
+  if (Number.isFinite(Number(order.amountCents))) {
+    return Number(order.amountCents) / 100;
+  }
+  if (Number.isFinite(Number(order.amount))) {
+    return Number(order.amount);
+  }
+  if (Number.isFinite(Number(order.total))) {
+    return Number(order.total);
+  }
+  return 0;
+}
+
+function formatMoney(value) {
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'TRY',
+    maximumFractionDigits: 2
+  }).format(Number(value) || 0);
+}
+
+function formatDate(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString('tr-TR');
+}
+
+function normalizeStatus(status) {
+  const value = String(status || '').toLowerCase();
+  if (['paid', 'active'].includes(value)) return value;
+  if (['pending', 'draft'].includes(value)) return value;
+  if (['failed', 'out'].includes(value)) return value;
+  return value || 'draft';
+}
+
+function statusLabel(status) {
+  const labels = {
+    active: 'Satışta',
+    out: 'Stokta yok',
+    draft: 'Taslak',
+    paid: 'Ödendi',
+    pending: 'Bekliyor',
+    failed: 'Başarısız'
+  };
+  return labels[normalizeStatus(status)] || String(status || '—');
+}
+
+function showToast(message) {
+  const toast = byId('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.classList.add('visible');
+  window.clearTimeout(showToast.timer);
+  showToast.timer = window.setTimeout(() => toast.classList.remove('visible'), 2600);
+}
+
+function setEmptyState(id, visible) {
+  byId(id)?.classList.toggle('visible', Boolean(visible));
+}
+
+function setView(name) {
+  document.querySelectorAll('.view').forEach((view) => {
+    view.classList.toggle('active', view.id === `view-${name}`);
   });
-  document.querySelectorAll('.sidebar-link').forEach(link => link.classList.toggle('active', link.dataset.section === name));
-  setText('section-title', { dashboard: 'Dashboard', products: 'Ürünler', orders: 'Siparişler', users: 'Kullanıcılar' }[name] || name);
-  const addButton = document.getElementById('add-btn');
-  if (addButton) addButton.style.display = name === 'products' ? '' : 'none';
-  currentSection = name;
-  if (name === 'dashboard') renderDashboard();
-  if (name === 'products') renderProductsTable();
-  if (name === 'orders') renderOrders();
-  if (name === 'users') renderUsers();
+
+  document.querySelectorAll('.nav-item').forEach((button) => {
+    button.classList.toggle('active', button.dataset.view === name);
+  });
+
+  const titles = {
+    dashboard: 'Genel Bakış',
+    products: 'Ürünler',
+    orders: 'Siparişler'
+  };
+
+  const heading = byId('pageHeading');
+  if (heading) heading.textContent = titles[name] || 'Filementor';
 }
 
-async function renderUsers() {
-  const tbody = document.getElementById('users-tbody'); if (!tbody) return;
+function productImage(product) {
+  if (product.image) {
+    const img = createEl('img', 'product-thumb');
+    img.src = product.image;
+    img.alt = product.name || 'Ürün görseli';
+    return img;
+  }
+  return createEl('span', 'product-placeholder', product.emoji || '📦');
+}
+
+function productCell(product) {
+  const wrap = createEl('div', 'product-cell');
+  wrap.append(productImage(product), createEl('span', 'product-name', product.name || 'İsimsiz ürün'));
+  return wrap;
+}
+
+function statusBadge(status) {
+  const normalized = normalizeStatus(status);
+  return createEl('span', `status-badge status-${normalized}`, statusLabel(normalized));
+}
+
+function actionButton(label, handler, danger = false) {
+  const button = createEl('button', `action-button${danger ? ' danger' : ''}`, label);
+  button.type = 'button';
+  button.addEventListener('click', handler);
+  return button;
+}
+
+function renderProducts(query = '') {
+  const tbody = byId('productTableBody');
+  if (!tbody) return;
+
+  const normalized = query.trim().toLocaleLowerCase('tr-TR');
+  const filtered = state.products.filter((product) => {
+    const name = String(product.name || '').toLocaleLowerCase('tr-TR');
+    const category = String(product.cat || product.category || '').toLocaleLowerCase('tr-TR');
+    return !normalized || name.includes(normalized) || category.includes(normalized);
+  });
+
   tbody.replaceChildren();
-  try {
-    const response = await fetch(`${window.FILEMENTOR_API_BASE || ''}/api/admin/users`, { credentials: 'include' });
-    if (!response.ok) throw new Error('Kullanıcılar alınamadı.');
-    const { users = [] } = await response.json();
-    if (!users.length) {
-      const row = document.createElement('tr'); const cell = node('td', '', 'Henüz kayıt yok.'); cell.colSpan = 5; row.append(cell); tbody.replaceChildren(row); return;
-    }
-    const statusLabels = { pending: 'Onay Bekliyor', approved: 'Onaylandı', rejected: 'Reddedildi' };
-    tbody.replaceChildren(...users.map(user => {
-      const row = document.createElement('tr');
-      row.append(
-        node('td', '', user.username),
-        node('td', '', user.role === 'owner' ? 'Owner' : 'Personel'),
-        node('td', '', statusLabels[user.status] || user.status),
-        node('td', '', new Date(user.created_at).toLocaleString('tr-TR'))
-      );
-      const actionsCell = node('td', '');
-      if (user.status === 'pending') {
-        const approve = node('button', 'tbl-btn', '✅ Onayla'); approve.type = 'button'; approve.addEventListener('click', () => setUserStatus(user.id, 'approve'));
-        const reject = node('button', 'tbl-btn tbl-btn-del', '🚫 Reddet'); reject.type = 'button'; reject.style.marginLeft = '4px'; reject.addEventListener('click', () => setUserStatus(user.id, 'reject'));
-        actionsCell.append(approve, reject);
-      } else {
-        actionsCell.textContent = '—';
-      }
-      row.append(actionsCell);
-      return row;
-    }));
-  } catch (error) { console.error(error); showToast('Kullanıcılar yüklenemedi.'); }
+  setEmptyState('productsEmpty', filtered.length === 0);
+
+  for (const product of filtered) {
+    const row = document.createElement('tr');
+
+    const nameTd = document.createElement('td');
+    nameTd.append(productCell(product));
+
+    const categoryTd = createEl('td', '', product.cat || product.category || '—');
+    const priceTd = createEl('td', '', formatMoney(product.price));
+    const stockTd = createEl('td', '', product.stock ?? 0);
+
+    const statusTd = document.createElement('td');
+    statusTd.append(statusBadge(product.status));
+
+    const actionsTd = document.createElement('td');
+    const actions = createEl('div', 'action-group');
+    actions.append(
+      actionButton('Düzenle', () => openProductModal(product)),
+      actionButton('Sil', () => removeProduct(product.id), true)
+    );
+    actionsTd.append(actions);
+
+    row.append(nameTd, categoryTd, priceTd, stockTd, statusTd, actionsTd);
+    tbody.append(row);
+  }
 }
 
-async function setUserStatus(id, action) {
-  try {
-    const response = await fetch(`${window.FILEMENTOR_API_BASE || ''}/api/admin/users/${id}/${action}`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    if (!response.ok) throw new Error('İşlem başarısız.');
-    showToast(action === 'approve' ? 'Kullanıcı onaylandı.' : 'Kullanıcı reddedildi.');
-    renderUsers();
-  } catch (error) { console.error(error); showToast('İşlem yapılamadı.'); }
-}
+function renderOrders() {
+  const tbody = byId('orderTableBody');
+  if (!tbody) return;
 
-async function renderOrders() {
-  const tbody = document.getElementById('orders-tbody'); if (!tbody) return;
-  tbody.replaceChildren(node('tr', '', ''));
-  try {
-    const response = await fetch(`${window.FILEMENTOR_API_BASE || ''}/api/admin/orders`, { credentials: 'include' });
-    if (!response.ok) throw new Error('Siparişler alınamadı.');
-    const { orders = [] } = await response.json();
-    if (!orders.length) {
-      const row = document.createElement('tr'); const cell = node('td', '', 'Henüz sipariş yok.'); cell.colSpan = 5; row.append(cell); tbody.replaceChildren(row); return;
-    }
-    tbody.replaceChildren(...orders.map(order => {
-      const row = document.createElement('tr');
-      const status = { paid: 'Ödendi', pending: 'Bekliyor', failed: 'Başarısız' }[order.status] || order.status;
-      row.append(
-        node('td', '', String(order.id).slice(0, 8)),
-        node('td', '', `${order.customerName} (${order.customerEmail})`),
-        node('td', '', `₺${(Number(order.amountCents) / 100).toLocaleString('tr-TR', { minimumFractionDigits: 2 })}`),
-        node('td', '', status),
-        node('td', '', new Date(order.createdAt).toLocaleString('tr-TR'))
-      );
-      return row;
-    }));
-  } catch {
-    const row = document.createElement('tr'); const cell = node('td', '', 'Siparişler yüklenemedi.'); cell.colSpan = 5; row.append(cell); tbody.replaceChildren(row);
+  const query = String(byId('orderSearchInput')?.value || '').trim().toLocaleLowerCase('tr-TR');
+  const filtered = state.orders.filter((order) => {
+    const id = String(order.id || order.orderId || '').toLocaleLowerCase('tr-TR');
+    const name = String(order.customerName || order.customer_name || '').toLocaleLowerCase('tr-TR');
+    const email = String(order.customerEmail || order.customer_email || '').toLocaleLowerCase('tr-TR');
+    return !query || id.includes(query) || name.includes(query) || email.includes(query);
+  });
+
+  tbody.replaceChildren();
+  setEmptyState('ordersEmpty', filtered.length === 0);
+
+  for (const order of filtered) {
+    const row = document.createElement('tr');
+    const id = String(order.id || order.orderId || '—');
+    const name = order.customerName || order.customer_name || '—';
+    const email = order.customerEmail || order.customer_email || '—';
+
+    const statusTd = document.createElement('td');
+    statusTd.append(statusBadge(order.status));
+
+    row.append(
+      createEl('td', '', id.length > 12 ? id.slice(0, 12) : id),
+      createEl('td', '', name),
+      createEl('td', '', email),
+      createEl('td', '', formatMoney(moneyFromOrder(order))),
+      statusTd,
+      createEl('td', '', formatDate(order.createdAt || order.created_at))
+    );
+    tbody.append(row);
   }
 }
 
 function renderDashboard() {
-  const products = getProducts();
-  setText('d-total', products.length);
-  setText('d-active', products.filter(p => p.status === 'active' && Number(p.stock) > 0).length);
-  setText('d-out', products.filter(p => p.status === 'out' || Number(p.stock) <= 0).length);
-  setText('d-cats', new Set(products.map(p => p.cat)).size);
-  const tbody = document.getElementById('recent-tbody');
-  if (!tbody) return;
-  tbody.replaceChildren(...[...products].reverse().slice(0, 5).map(product => {
-    const row = document.createElement('tr');
-    const nameCell = document.createElement('td');
-    nameCell.append(productVisual(product, 32), node('strong', '', product.name));
-    const statusCell = document.createElement('td');
-    statusCell.append(node('span', `status-pill status-${product.status}`, statusLabel(product.status)));
-    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), stockControls(product), statusCell);
-    return row;
-  }));
-}
+  const outOfStock = state.products.filter((p) => p.status === 'out' || Number(p.stock) <= 0).length;
+  const pending = state.orders.filter((order) => normalizeStatus(order.status) === 'pending').length;
+  const revenue = state.orders
+    .filter((order) => normalizeStatus(order.status) === 'paid')
+    .reduce((sum, order) => sum + moneyFromOrder(order), 0);
 
-function renderProductsTable(query = '') {
-  const normalizedQuery = query.toLocaleLowerCase('tr-TR');
-  const products = getProducts().filter(product => !normalizedQuery ||
-    product.name.toLocaleLowerCase('tr-TR').includes(normalizedQuery) ||
-    product.cat.toLocaleLowerCase('tr-TR').includes(normalizedQuery));
-  const tbody = document.getElementById('products-tbody');
+  byId('statProductCount').textContent = String(state.products.length);
+  byId('statOutOfStock').textContent = String(outOfStock);
+  byId('statRevenue').textContent = formatMoney(revenue);
+  byId('statPendingOrders').textContent = String(pending);
+
+  const tbody = byId('recentOrdersBody');
   if (!tbody) return;
-  if (!products.length) {
+
+  const recent = [...state.orders]
+    .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
+    .slice(0, 5);
+
+  tbody.replaceChildren();
+  setEmptyState('recentOrdersEmpty', recent.length === 0);
+
+  for (const order of recent) {
     const row = document.createElement('tr');
-    const cell = node('td', '', 'Ürün bulunamadı.'); cell.colSpan = 6;
-    Object.assign(cell.style, { textAlign: 'center', color: '#aaa', padding: '2rem' });
-    row.append(cell); tbody.replaceChildren(row); return;
+    const statusTd = document.createElement('td');
+    statusTd.append(statusBadge(order.status));
+
+    const id = String(order.id || order.orderId || '—');
+
+    row.append(
+      createEl('td', '', id.length > 12 ? id.slice(0, 12) : id),
+      createEl('td', '', order.customerName || order.customer_name || '—'),
+      createEl('td', '', formatMoney(moneyFromOrder(order))),
+      statusTd,
+      createEl('td', '', formatDate(order.createdAt || order.created_at))
+    );
+    tbody.append(row);
   }
-  tbody.replaceChildren(...products.map(product => {
-    const row = document.createElement('tr');
-    const nameCell = document.createElement('td');
-    Object.assign(nameCell.style, { display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px' });
-    nameCell.append(productVisual(product, 40), node('strong', '', product.name));
-    const statusCell = document.createElement('td');
-    statusCell.append(node('span', `status-pill status-${product.status}`, statusLabel(product.status)));
-    const stockCell = stockControls(product);
-    const actions = document.createElement('td'); actions.style.whiteSpace = 'nowrap';
-    const edit = node('button', 'tbl-btn', '✏️ Düzenle'); edit.type = 'button'; edit.addEventListener('click', () => editProduct(product.id));
-    const remove = node('button', 'tbl-btn tbl-btn-del', '🗑 Sil'); remove.type = 'button'; remove.style.marginLeft = '4px'; remove.addEventListener('click', () => deleteProduct(product.id));
-    actions.append(edit, remove);
-    row.append(nameCell, node('td', '', product.cat), node('td', '', `₺${Number(product.price).toLocaleString('tr-TR')}`), stockCell, statusCell, actions);
-    return row;
-  }));
 }
 
-function filterProducts() { renderProductsTable(document.getElementById('search-input')?.value || ''); }
+async function loadOrders() {
+  try {
+    const response = await fetch(`${API_BASE}/api/admin/orders`, {
+      credentials: 'include'
+    });
 
-function stockControls(product) {
-  const cell = document.createElement('td');
-  const decrease = node('button', 'tbl-btn', '−'); decrease.type = 'button'; decrease.title = 'Stok azalt';
-  decrease.disabled = Number(product.stock) <= 0; decrease.addEventListener('click', () => adjustStock(product, -1));
-  const value = node('strong', '', product.stock ?? 0);
-  Object.assign(value.style, { display: 'inline-block', minWidth: '34px', textAlign: 'center' });
-  const increase = node('button', 'tbl-btn', '+'); increase.type = 'button'; increase.title = 'Stok artır';
-  increase.addEventListener('click', () => adjustStock(product, 1));
-  cell.append(decrease, value, increase);
-  return cell;
+    if (!response.ok) {
+      state.orders = [];
+      return;
+    }
+
+    const data = await response.json();
+    state.orders = Array.isArray(data) ? data : (Array.isArray(data.orders) ? data.orders : []);
+  } catch (error) {
+    console.error('Siparişler yüklenemedi:', error);
+    state.orders = [];
+  }
 }
 
-function openModal(product = null) {
-  editingId = product?.id ?? null;
-  pendingImage = product?.image || null;
-  setText('modal-title', product ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle');
-  setValue('f-name', product?.name || ''); setValue('f-price', product?.price || '');
-  setValue('f-stock', product?.stock ?? 1);
-  setValue('f-cat', product?.cat || ''); setValue('f-desc', product?.desc || '');
-  setValue('f-status', product?.status || 'active'); setValue('f-new', String(Boolean(product?.isNew)));
-  buildEmojiGrid(product?.emoji || '📦'); renderImagePreview();
-  document.getElementById('modal-overlay')?.classList.add('open');
+async function refreshAll() {
+  try {
+    await fetchProducts();
+    state.products = getProducts();
+  } catch (error) {
+    console.error('Ürünler yüklenemedi:', error);
+    state.products = [];
+  }
+
+  await loadOrders();
+  renderProducts(byId('searchInput')?.value || '');
+  renderOrders();
+  renderDashboard();
 }
 
-function closeModal() { document.getElementById('modal-overlay')?.classList.remove('open'); editingId = null; pendingImage = null; }
-
-function buildEmojiGrid(selected) {
-  selectedEmoji = selected;
-  const grid = document.getElementById('emoji-grid'); if (!grid) return;
-  grid.replaceChildren(...EMOJIS.map(emoji => {
-    const option = node('button', `emoji-opt${emoji === selected ? ' selected' : ''}`, emoji);
-    option.type = 'button'; option.addEventListener('click', () => selectEmoji(emoji)); return option;
-  }));
+function resetForm() {
+  state.editingId = null;
+  state.imageData = '';
+  byId('editProductId').value = '';
+  byId('pImageData').value = '';
+  byId('pName').value = '';
+  byId('pCategory').value = '';
+  byId('pPrice').value = '';
+  byId('pStock').value = '1';
+  byId('pStatus').value = 'active';
+  byId('pImageFile').value = '';
+  byId('imageUploadStatus').textContent = '';
+  byId('formError').textContent = '';
+  byId('pImagePreview').removeAttribute('src');
+  byId('pImagePreview').classList.remove('visible');
 }
 
-function selectEmoji(emoji) {
-  selectedEmoji = emoji;
-  document.querySelectorAll('.emoji-opt').forEach(el => el.classList.toggle('selected', el.textContent === emoji));
-}
+function openProductModal(product = null) {
+  resetForm();
 
-function renderImagePreview() {
-  const wrap = document.getElementById('img-preview-wrap'); if (!wrap) return;
-  if (pendingImage) {
-    const box = node('div', 'img-preview-box');
-    const image = node('img', 'img-preview-thumb'); image.src = pendingImage; image.alt = 'Ürün resmi';
-    const remove = node('button', 'img-remove-btn', '✕'); remove.type = 'button'; remove.title = 'Resmi kaldır'; remove.addEventListener('click', removeImage);
-    box.append(image, remove);
-    const hint = node('p', 'img-hint', 'Değiştirmek için yeni dosya seç');
-    const label = node('label', 'img-upload-label', '📂 Farklı resim seç'); label.htmlFor = 'f-image';
-    wrap.replaceChildren(box, hint, label);
+  if (product) {
+    state.editingId = product.id;
+    state.imageData = product.image || '';
+
+    byId('editProductId').value = String(product.id ?? '');
+    byId('pImageData').value = state.imageData;
+    byId('pName').value = product.name || '';
+    byId('pCategory').value = product.cat || product.category || '';
+    byId('pPrice').value = product.price ?? '';
+    byId('pStock').value = product.stock ?? 0;
+    byId('pStatus').value = product.status || 'active';
+    byId('modalTitle').textContent = 'Ürünü düzenle';
+
+    if (state.imageData) {
+      byId('pImagePreview').src = state.imageData;
+      byId('pImagePreview').classList.add('visible');
+    }
   } else {
-    const label = node('label', 'img-drop-zone'); label.htmlFor = 'f-image'; label.id = 'drop-zone';
-    label.append(node('span', 'drop-icon', '🖼️'), node('span', 'drop-text', 'JPG, PNG veya WEBP yükle'), node('span', 'drop-sub', 'Tıkla veya sürükle bırak • Maks 50 MB • Otomatik sıkıştırılır'));
-    wrap.replaceChildren(label); setupDropZone();
+    byId('modalTitle').textContent = 'Yeni ürün ekle';
+  }
+
+  byId('productModal').classList.add('open');
+  byId('productModal').setAttribute('aria-hidden', 'false');
+  byId('pName').focus();
+}
+
+function closeProductModal() {
+  byId('productModal').classList.remove('open');
+  byId('productModal').setAttribute('aria-hidden', 'true');
+}
+
+async function handleImageChange(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  byId('imageUploadStatus').textContent = 'Görsel hazırlanıyor...';
+
+  try {
+    state.imageData = await fileToBase64(file);
+    byId('pImageData').value = state.imageData;
+    byId('pImagePreview').src = state.imageData;
+    byId('pImagePreview').classList.add('visible');
+    byId('imageUploadStatus').textContent = 'Görsel hazır.';
+  } catch (error) {
+    console.error(error);
+    event.target.value = '';
+    state.imageData = '';
+    byId('pImageData').value = '';
+    byId('pImagePreview').removeAttribute('src');
+    byId('pImagePreview').classList.remove('visible');
+    byId('imageUploadStatus').textContent = 'Görsel işlenemedi.';
   }
 }
 
-function setupDropZone() {
-  const zone = document.getElementById('drop-zone'); if (!zone) return;
-  zone.addEventListener('dragover', event => { event.preventDefault(); zone.classList.add('drag-over'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-  zone.addEventListener('drop', event => { event.preventDefault(); zone.classList.remove('drag-over'); const file = event.dataTransfer.files[0]; if (file) handleImageFile(file); });
-}
+async function submitProduct(event) {
+  event.preventDefault();
 
-async function handleImageFile(file) {
-  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { alert('Yalnızca JPG, PNG veya WEBP seçebilirsiniz.'); return; }
-  if (file.size > 50 * 1024 * 1024) { alert('Kaynak görsel 50 MB’dan büyük olamaz.'); return; }
-  try {
-    const encoded = await fileToBase64(file);
-    if (encoded.length > 700000) throw new Error('Görsel çok büyük.');
-    pendingImage = encoded; renderImagePreview();
-  } catch { alert('Resim işlenemedi veya güvenli boyuta sıkıştırılamadı. Başka bir görsel deneyin.'); }
-}
+  const name = byId('pName').value.trim();
+  const cat = byId('pCategory').value.trim();
+  const price = Number(byId('pPrice').value);
+  const stock = Number(byId('pStock').value);
+  const status = byId('pStatus').value;
 
-function removeImage() { pendingImage = null; renderImagePreview(); }
+  byId('formError').textContent = '';
 
-async function saveProduct() {
-  const name = document.getElementById('f-name')?.value.trim();
-  const price = Number(document.getElementById('f-price')?.value);
-  const stock = Number(document.getElementById('f-stock')?.value);
-  const cat = document.getElementById('f-cat')?.value.trim();
-  const desc = document.getElementById('f-desc')?.value.trim() || '';
-  const status = document.getElementById('f-status')?.value;
-  const isNew = document.getElementById('f-new')?.value === 'true';
-  if (!name || !Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0 || !cat) { alert('Zorunlu alanları geçerli değerlerle doldurun.'); return; }
-  const payload = { name, price, stock, cat, desc, status, isNew, emoji: selectedEmoji, image: pendingImage };
-  const wasEditing = editingId !== null;
-  try {
-    const result = wasEditing ? await updateProductOnServer(editingId, payload) : await createProduct(payload);
-    if (!result.success) { alert(result.message || 'Ürün kaydedilemedi.'); return; }
-    await fetchProducts(); closeModal(); renderDashboard(); if (currentSection === 'products') renderProductsTable();
-    showToast(wasEditing ? 'Ürün güncellendi ✓' : 'Yeni ürün eklendi ✓');
-  } catch (error) { console.error(error); alert('Sunucuya bağlanılamadı.'); }
-}
+  if (!name || !cat || !Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0) {
+    byId('formError').textContent = 'Lütfen zorunlu alanları geçerli bilgilerle doldurun.';
+    return;
+  }
 
-function editProduct(id) { const product = getProducts().find(item => String(item.id) === String(id)); if (product) openModal(product); }
-async function adjustStock(product, delta) {
-  const currentStock = Number(product.stock) || 0;
-  const stock = Math.max(0, currentStock + delta);
-  if (!Number.isInteger(stock) || stock > 1000000 || stock === currentStock) return;
-  const status = stock === 0 ? 'out' : (product.status === 'draft' ? 'draft' : 'active');
+  const existing = state.products.find((p) => String(p.id) === String(state.editingId));
+
   const payload = {
-    name: product.name, price: Number(product.price), stock, cat: product.cat,
-    desc: product.desc || '', status, isNew: Boolean(product.isNew),
-    emoji: product.emoji || '📦', image: product.image || null
+    name,
+    cat,
+    price,
+    stock,
+    status,
+    image: state.imageData || null,
+    emoji: existing?.emoji || '📦',
+    desc: existing?.desc || '',
+    isNew: existing?.isNew || false
   };
+
+  const submitButton = byId('btnSubmitProduct');
+  submitButton.disabled = true;
+  submitButton.textContent = 'Kaydediliyor...';
+
   try {
-    const result = await updateProductOnServer(product.id, payload);
-    if (!result.success) throw new Error(result.message || 'Stok güncellenemedi.');
-    await fetchProducts(); renderProductsTable(document.getElementById('search-input')?.value || ''); renderDashboard();
-    showToast(`Stok ${stock} olarak güncellendi.`);
-  } catch (error) { console.error(error); alert(error.message || 'Stok güncellenemedi.'); }
+    let result;
+    if (state.editingId !== null) {
+      result = await updateProductOnServer(state.editingId, payload);
+    } else {
+      result = await createProduct(payload);
+    }
+
+    if (result?.success === false) {
+      throw new Error(result.message || 'Ürün kaydedilemedi.');
+    }
+
+    closeProductModal();
+    await refreshAll();
+    showToast(state.editingId !== null ? 'Ürün güncellendi.' : 'Ürün eklendi.');
+  } catch (error) {
+    console.error(error);
+    byId('formError').textContent = error.message || 'Ürün kaydedilemedi.';
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Kaydet';
+  }
 }
-async function deleteProduct(id) {
-  if (!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) return;
-  try { const result = await deleteProductOnServer(id); if (!result.success) throw new Error(result.message); await fetchProducts(); renderProductsTable(); renderDashboard(); showToast('Ürün silindi.'); }
-  catch (error) { console.error(error); alert('Ürün silinemedi.'); }
+
+async function removeProduct(id) {
+  const product = state.products.find((item) => String(item.id) === String(id));
+  const confirmed = window.confirm(`"${product?.name || 'Bu ürün'}" silinsin mi?`);
+  if (!confirmed) return;
+
+  try {
+    const result = await deleteProductOnServer(id);
+    if (result?.success === false) {
+      throw new Error(result.message || 'Ürün silinemedi.');
+    }
+    await refreshAll();
+    showToast('Ürün silindi.');
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'Ürün silinemedi.');
+  }
 }
 
-let toastTimer;
-function showToast(message) { const el = document.getElementById('toast'); if (!el) return; el.textContent = message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2800); }
+function bindEvents() {
+  document.querySelectorAll('.nav-item').forEach((button) => {
+    button.addEventListener('click', () => setView(button.dataset.view));
+  });
 
-document.addEventListener('DOMContentLoaded', async () => {
-  document.querySelectorAll('.sidebar-link[data-section]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); showSection(link.dataset.section); }));
-  document.addEventListener('change', event => { if (event.target.id === 'f-image' && event.target.files[0]) handleImageFile(event.target.files[0]); });
+  byId('searchInput')?.addEventListener('input', (event) => renderProducts(event.target.value));
+  byId('orderSearchInput')?.addEventListener('input', renderOrders);
+  byId('btnOpenAddModal')?.addEventListener('click', () => openProductModal());
+  byId('btnCloseModal')?.addEventListener('click', closeProductModal);
+  byId('btnCancelModal')?.addEventListener('click', closeProductModal);
+  byId('productForm')?.addEventListener('submit', submitProduct);
+  byId('pImageFile')?.addEventListener('change', handleImageChange);
 
-  document.getElementById('logout-btn')?.addEventListener('click', adminLogout);
-  document.getElementById('add-btn')?.addEventListener('click', () => openModal());
-  document.getElementById('search-input')?.addEventListener('input', filterProducts);
-  document.getElementById('modal-overlay')?.addEventListener('click', event => { if (event.target === event.currentTarget) closeModal(); });
-  document.getElementById('modal-close-btn')?.addEventListener('click', closeModal);
-  document.getElementById('modal-cancel-btn')?.addEventListener('click', closeModal);
-  document.getElementById('modal-save-btn')?.addEventListener('click', saveProduct);
+  byId('productModal')?.addEventListener('click', (event) => {
+    if (event.target === byId('productModal')) closeProductModal();
+  });
 
-  const session = window.__ADMIN_READY ? await window.__ADMIN_READY : null;
-  if (session && session.role === 'owner') {
-    const usersLink = document.getElementById('users-nav-link');
-    if (usersLink) usersLink.style.display = '';
+  byId('btnLogout')?.addEventListener('click', () => {
+    if (typeof adminLogout === 'function') adminLogout();
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeProductModal();
+  });
+}
+
+async function boot() {
+  if (window.__ADMIN_READY) {
+    const session = await window.__ADMIN_READY;
+    if (!session) return;
   }
 
-  await fetchProducts(); showSection('dashboard');
-});
+  if (window.__ADMIN_USERNAME) {
+    byId('adminWhoami').textContent = window.__ADMIN_USERNAME;
+  }
+
+  bindEvents();
+  setView('products');
+  await refreshAll();
+}
+
+document.addEventListener('DOMContentLoaded', boot);
