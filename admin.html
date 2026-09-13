@@ -3,172 +3,218 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Paneli - Filementor</title>
+  <meta name="color-scheme" content="light">
+  <title>Filementor Admin</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/admin.css?v=2">
+  <link rel="stylesheet" href="css/admin.css?v=3">
 </head>
 <body>
+  <div class="admin-shell">
+    <aside class="sidebar" aria-label="Yönetim menüsü">
+      <div>
+        <a class="brand" href="admin.html" aria-label="Filementor Admin">
+          <span class="brand-mark"><i class="fa-solid fa-cube"></i></span>
+          <span>
+            <strong>Filementor</strong>
+            <small>Admin</small>
+          </span>
+        </a>
 
-  <aside class="sidebar">
-    <div>
-      <div class="brand">
-        <div class="brand-logo-icon"></div>
-        <span>Filementor</span>
+        <nav class="nav-links">
+          <button type="button" class="nav-item" data-view="dashboard">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Genel Bakış</span>
+          </button>
+          <button type="button" class="nav-item active" data-view="products">
+            <i class="fa-solid fa-box"></i>
+            <span>Ürünler</span>
+          </button>
+          <button type="button" class="nav-item" data-view="orders">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span>Siparişler</span>
+          </button>
+        </nav>
       </div>
 
-      <ul class="nav-links">
-        <li class="nav-item" data-view="dashboard">
-          <a href="#dashboard"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
-        </li>
-        <li class="nav-item active" data-view="products">
-          <a href="#products"><i class="fa-solid fa-box"></i> Ürünler</a>
-        </li>
-        <li class="nav-item" data-view="orders">
-          <a href="#orders"><i class="fa-solid fa-cart-shopping"></i> Siparişler</a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="sidebar-footer">
-      <span id="adminWhoami"></span>
-      <a href="/"><i class="fa-solid fa-arrow-left"></i> Mağazaya Dön</a>
-      <a href="#" id="btnLogout">Çıkış Yap</a>
-    </div>
-  </aside>
-
-  <main class="main-content">
-
-    <!-- DASHBOARD -->
-    <section id="view-dashboard" class="view">
-      <h1 class="page-title">Dashboard</h1>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon stat-icon-blue"><i class="fa-solid fa-box"></i></div>
+      <div class="sidebar-footer">
+        <div class="account-chip">
+          <span class="account-avatar"><i class="fa-solid fa-user"></i></span>
           <div>
-            <div class="stat-value" id="statProductCount">–</div>
-            <div class="stat-label">Toplam Ürün</div>
+            <strong id="adminWhoami">Yönetici</strong>
+            <small>Aktif oturum</small>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon stat-icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
-          <div>
-            <div class="stat-value" id="statOutOfStock">–</div>
-            <div class="stat-label">Stokta Yok</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon stat-icon-green"><i class="fa-solid fa-sack-dollar"></i></div>
-          <div>
-            <div class="stat-value" id="statRevenue">–</div>
-            <div class="stat-label">Ödenen Toplam Ciro</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon stat-icon-purple"><i class="fa-solid fa-cart-shopping"></i></div>
-          <div>
-            <div class="stat-value" id="statPendingOrders">–</div>
-            <div class="stat-label">Bekleyen Sipariş</div>
-          </div>
-        </div>
+
+        <a class="sidebar-link" href="/">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Mağazaya dön</span>
+        </a>
+
+        <button type="button" id="btnLogout" class="sidebar-link danger-link">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Çıkış yap</span>
+        </button>
       </div>
+    </aside>
 
-      <div class="table-container">
-        <div class="table-top-bar">
-          <h2 class="table-title">Son Siparişler</h2>
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Filementor Yönetim Paneli</p>
+          <h1 id="pageHeading">Ürünler</h1>
         </div>
-        <table class="product-table">
-          <thead>
-            <tr>
-              <th>Sipariş No</th>
-              <th>Müşteri</th>
-              <th>Tutar</th>
-              <th>Durum</th>
-              <th>Tarih</th>
-            </tr>
-          </thead>
-          <tbody id="recentOrdersBody"></tbody>
-        </table>
-        <p id="recentOrdersEmpty" class="empty-state" style="display:none;">Henüz sipariş yok.</p>
-      </div>
-    </section>
+        <div class="topbar-badge">
+          <span class="status-dot"></span>
+          <span>Sistem aktif</span>
+        </div>
+      </header>
 
-    <!-- ÜRÜNLER -->
-    <section id="view-products" class="view active">
-      <h1 class="page-title">Ürünler</h1>
-
-      <div class="table-container">
-        <div class="table-top-bar">
-          <h2 class="table-title">Tüm Ürünler</h2>
-
-          <div class="actions-bar">
-            <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="searchInput" placeholder="Ürün ara...">
+      <section id="view-dashboard" class="view">
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-icon blue"><i class="fa-solid fa-boxes-stacked"></i></span>
+            <div>
+              <p class="stat-label">Toplam ürün</p>
+              <strong id="statProductCount" class="stat-value">—</strong>
             </div>
+          </article>
 
-            <button type="button" id="btnOpenAddModal" class="btn-add-product">
-              <i class="fa-solid fa-plus"></i> Yeni Ürün Ekle
-            </button>
-          </div>
+          <article class="stat-card">
+            <span class="stat-icon orange"><i class="fa-solid fa-triangle-exclamation"></i></span>
+            <div>
+              <p class="stat-label">Stokta yok</p>
+              <strong id="statOutOfStock" class="stat-value">—</strong>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-icon green"><i class="fa-solid fa-turkish-lira-sign"></i></span>
+            <div>
+              <p class="stat-label">Ödenen toplam ciro</p>
+              <strong id="statRevenue" class="stat-value">—</strong>
+            </div>
+          </article>
+
+          <article class="stat-card">
+            <span class="stat-icon purple"><i class="fa-solid fa-clock"></i></span>
+            <div>
+              <p class="stat-label">Bekleyen sipariş</p>
+              <strong id="statPendingOrders" class="stat-value">—</strong>
+            </div>
+          </article>
         </div>
 
-        <table class="product-table">
-          <thead>
-            <tr>
-              <th>Ürün</th>
-              <th>Kategori</th>
-              <th>Fiyat</th>
-              <th>Stok</th>
-              <th>Durum</th>
-              <th>İşlem</th>
-            </tr>
-          </thead>
-          <tbody id="productTableBody"></tbody>
-        </table>
-        <p id="productsEmpty" class="empty-state" style="display:none;">Ürün bulunamadı.</p>
-      </div>
-    </section>
-
-    <!-- SİPARİŞLER -->
-    <section id="view-orders" class="view">
-      <h1 class="page-title">Siparişler</h1>
-
-      <div class="table-container">
-        <div class="table-top-bar">
-          <h2 class="table-title">Tüm Siparişler</h2>
-          <div class="actions-bar">
-            <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="orderSearchInput" placeholder="Müşteri veya sipariş no ara...">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Siparişler</p>
+              <h2>Son siparişler</h2>
             </div>
           </div>
-        </div>
 
-        <table class="product-table">
-          <thead>
-            <tr>
-              <th>Sipariş No</th>
-              <th>Müşteri</th>
-              <th>E-posta</th>
-              <th>Tutar</th>
-              <th>Durum</th>
-              <th>Tarih</th>
-            </tr>
-          </thead>
-          <tbody id="orderTableBody"></tbody>
-        </table>
-        <p id="ordersEmpty" class="empty-state" style="display:none;">Henüz sipariş yok.</p>
-      </div>
-    </section>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sipariş no</th>
+                  <th>Müşteri</th>
+                  <th>Tutar</th>
+                  <th>Durum</th>
+                  <th>Tarih</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersBody"></tbody>
+            </table>
+          </div>
+          <p id="recentOrdersEmpty" class="empty-state">Henüz sipariş yok.</p>
+        </section>
+      </section>
 
-  </main>
+      <section id="view-products" class="view active">
+        <section class="panel">
+          <div class="panel-header panel-header-responsive">
+            <div>
+              <p class="panel-kicker">Katalog</p>
+              <h2>Tüm ürünler</h2>
+            </div>
 
-  <div id="productModal" class="modal-overlay">
-    <div class="modal-card">
+            <div class="actions-bar">
+              <label class="search-box" for="searchInput">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" id="searchInput" placeholder="Ürün ara..." autocomplete="off">
+              </label>
+
+              <button type="button" id="btnOpenAddModal" class="primary-button">
+                <i class="fa-solid fa-plus"></i>
+                <span>Yeni ürün</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Ürün</th>
+                  <th>Kategori</th>
+                  <th>Fiyat</th>
+                  <th>Stok</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody"></tbody>
+            </table>
+          </div>
+          <p id="productsEmpty" class="empty-state">Ürün bulunamadı.</p>
+        </section>
+      </section>
+
+      <section id="view-orders" class="view">
+        <section class="panel">
+          <div class="panel-header panel-header-responsive">
+            <div>
+              <p class="panel-kicker">Satış</p>
+              <h2>Tüm siparişler</h2>
+            </div>
+
+            <label class="search-box" for="orderSearchInput">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="search" id="orderSearchInput" placeholder="Müşteri veya sipariş no ara..." autocomplete="off">
+            </label>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Sipariş no</th>
+                  <th>Müşteri</th>
+                  <th>E-posta</th>
+                  <th>Tutar</th>
+                  <th>Durum</th>
+                  <th>Tarih</th>
+                </tr>
+              </thead>
+              <tbody id="orderTableBody"></tbody>
+            </table>
+          </div>
+          <p id="ordersEmpty" class="empty-state">Henüz sipariş yok.</p>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div id="productModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-header">
-        <h3 id="modalTitle" class="modal-title">Yeni Ürün Ekle</h3>
-        <button type="button" id="btnCloseModal" class="btn-close-modal">&times;</button>
+        <div>
+          <p class="panel-kicker">Ürün yönetimi</p>
+          <h2 id="modalTitle">Yeni ürün ekle</h2>
+        </div>
+        <button type="button" id="btnCloseModal" class="icon-button" aria-label="Kapat">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
       <form id="productForm">
@@ -176,7 +222,7 @@
         <input type="hidden" id="pImageData" value="">
 
         <div class="form-group">
-          <label for="pName">Ürün Başlığı</label>
+          <label for="pName">Ürün başlığı</label>
           <input type="text" id="pName" placeholder="Örn: NFC Tag Keychains" required>
         </div>
 
@@ -193,44 +239,47 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="pStock">Stok Adedi</label>
+            <label for="pStock">Stok adedi</label>
             <input type="number" id="pStock" value="1" required min="0">
           </div>
           <div class="form-group">
             <label for="pStatus">Durum</label>
             <select id="pStatus">
               <option value="active">Satışta</option>
-              <option value="out">Stokta Yok</option>
+              <option value="out">Stokta yok</option>
               <option value="draft">Taslak</option>
             </select>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="pImageFile">Ürün Görseli</label>
+          <label for="pImageFile">Ürün görseli</label>
           <div class="image-upload-row">
-            <img id="pImagePreview" class="product-thumb image-preview" alt="Önizleme">
-            <label class="btn-upload" for="pImageFile">
-              <i class="fa-solid fa-upload"></i> Fotoğraf Yükle
-              <input type="file" id="pImageFile" accept="image/*" hidden>
+            <img id="pImagePreview" class="image-preview" alt="Ürün görseli önizlemesi">
+            <label class="upload-button" for="pImageFile">
+              <i class="fa-solid fa-arrow-up-from-bracket"></i>
+              <span>Fotoğraf seç</span>
+              <input type="file" id="pImageFile" accept="image/jpeg,image/png,image/webp" hidden>
             </label>
           </div>
-          <p id="imageUploadStatus" class="upload-status"></p>
+          <p id="imageUploadStatus" class="helper-text"></p>
         </div>
 
-        <p id="formError" class="form-error"></p>
+        <p id="formError" class="form-error" role="alert"></p>
 
         <div class="modal-footer">
-          <button type="button" id="btnCancelModal" class="btn-cancel">İptal</button>
-          <button type="submit" id="btnSubmitProduct" class="btn-submit">Kaydet</button>
+          <button type="button" id="btnCancelModal" class="secondary-button">İptal</button>
+          <button type="submit" id="btnSubmitProduct" class="primary-button">Kaydet</button>
         </div>
       </form>
     </div>
   </div>
 
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
   <script src="js/api-config.js?v=3"></script>
   <script src="js/admin-guard.js?v=1"></script>
   <script src="js/products.js?v=3"></script>
-  <script src="js/admin.js?v=2"></script>
+  <script src="js/admin.js?v=3"></script>
 </body>
 </html>
