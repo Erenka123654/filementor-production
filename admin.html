@@ -1,105 +1,119 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Yönetim Paneli — PrintCraft Studio</title>
-  <script src="js/api-config.js?v=3"></script>
-  <script src="js/admin-guard.js?v=3"></script>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/admin.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Paneli - Filementor</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/admin.css?v=2">
 </head>
-<body class="admin-body">
+<body>
 
-  <!-- ══════════════ SIDEBAR ══════════════ -->
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <span class="logo-icon">⬡</span>
-      <span class="logo-text">File<strong>mentor</strong></span>
+    <div>
+      <div class="brand">
+        <div class="brand-logo-icon"></div>
+        <span>Filementor</span>
+      </div>
+
+      <ul class="nav-links">
+        <li class="nav-item" data-view="dashboard">
+          <a href="#dashboard"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+        </li>
+        <li class="nav-item active" data-view="products">
+          <a href="#products"><i class="fa-solid fa-box"></i> Ürünler</a>
+        </li>
+        <li class="nav-item" data-view="orders">
+          <a href="#orders"><i class="fa-solid fa-cart-shopping"></i> Siparişler</a>
+        </li>
+      </ul>
     </div>
-    <nav class="sidebar-nav">
-      <a href="#" class="sidebar-link active" data-section="dashboard">📊 Dashboard</a>
-      <a href="#" class="sidebar-link" data-section="products">📦 Ürünler</a>
-      <a href="#" class="sidebar-link" data-section="orders">🛒 Siparişler</a>
-    </nav>
+
     <div class="sidebar-footer">
-      <a href="index.html" class="sidebar-link">← Mağazaya Dön</a>
-      <button type="button" class="sidebar-link sidebar-logout" onclick="adminLogout()">Çıkış Yap</button>
+      <span id="adminWhoami"></span>
+      <a href="/"><i class="fa-solid fa-arrow-left"></i> Mağazaya Dön</a>
+      <a href="#" id="btnLogout">Çıkış Yap</a>
     </div>
   </aside>
 
-  <!-- ══════════════ MAIN ══════════════ -->
-  <main class="admin-main">
+  <main class="main-content">
 
-    <!-- TOPBAR -->
-    <div class="topbar">
-      <h1 class="topbar-title" id="section-title">Dashboard</h1>
-      <button class="btn btn-primary" id="add-btn" onclick="openModal()" style="display:none">+ Yeni Ürün Ekle</button>
-    </div>
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view">
+      <h1 class="page-title">Dashboard</h1>
 
-    <!-- ── DASHBOARD ── -->
-    <section id="section-dashboard">
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-icon">📦</div>
+          <div class="stat-icon stat-icon-blue"><i class="fa-solid fa-box"></i></div>
           <div>
-            <div class="stat-value" id="d-total">0</div>
+            <div class="stat-value" id="statProductCount">–</div>
             <div class="stat-label">Toplam Ürün</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">✅</div>
+          <div class="stat-icon stat-icon-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
           <div>
-            <div class="stat-value" id="d-active">0</div>
-            <div class="stat-label">Satışta</div>
+            <div class="stat-value" id="statOutOfStock">–</div>
+            <div class="stat-label">Stokta Yok</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">❌</div>
+          <div class="stat-icon stat-icon-green"><i class="fa-solid fa-sack-dollar"></i></div>
           <div>
-            <div class="stat-value" id="d-out">0</div>
-            <div class="stat-label">Stok Yok</div>
+            <div class="stat-value" id="statRevenue">–</div>
+            <div class="stat-label">Ödenen Toplam Ciro</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon">🗂️</div>
+          <div class="stat-icon stat-icon-purple"><i class="fa-solid fa-cart-shopping"></i></div>
           <div>
-            <div class="stat-value" id="d-cats">0</div>
-            <div class="stat-label">Kategori</div>
+            <div class="stat-value" id="statPendingOrders">–</div>
+            <div class="stat-label">Bekleyen Sipariş</div>
           </div>
         </div>
       </div>
 
-      <div class="admin-card">
-        <h3 class="admin-card-title">Son Eklenen Ürünler</h3>
-        <table class="admin-table" id="recent-table">
+      <div class="table-container">
+        <div class="table-top-bar">
+          <h2 class="table-title">Son Siparişler</h2>
+        </div>
+        <table class="product-table">
           <thead>
             <tr>
-              <th>Ürün</th>
-              <th>Kategori</th>
-              <th>Fiyat</th>
-              <th>Stok</th>
+              <th>Sipariş No</th>
+              <th>Müşteri</th>
+              <th>Tutar</th>
               <th>Durum</th>
+              <th>Tarih</th>
             </tr>
           </thead>
-          <tbody id="recent-tbody"></tbody>
+          <tbody id="recentOrdersBody"></tbody>
         </table>
+        <p id="recentOrdersEmpty" class="empty-state" style="display:none;">Henüz sipariş yok.</p>
       </div>
     </section>
 
-    <!-- ── ÜRÜNLER ── -->
-    <section id="section-products" style="display:none">
-      <div class="admin-card">
-        <div class="card-head">
-          <h3 class="admin-card-title">Tüm Ürünler</h3>
-          <div class="search-wrap">
-            <input class="search-input" type="text" id="search-input" placeholder="Ürün ara..." oninput="filterProducts()" />
+    <!-- ÜRÜNLER -->
+    <section id="view-products" class="view active">
+      <h1 class="page-title">Ürünler</h1>
+
+      <div class="table-container">
+        <div class="table-top-bar">
+          <h2 class="table-title">Tüm Ürünler</h2>
+
+          <div class="actions-bar">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="searchInput" placeholder="Ürün ara...">
+            </div>
+
+            <button type="button" id="btnOpenAddModal" class="btn-add-product">
+              <i class="fa-solid fa-plus"></i> Yeni Ürün Ekle
+            </button>
           </div>
         </div>
-        <table class="admin-table" id="products-table">
+
+        <table class="product-table">
           <thead>
             <tr>
               <th>Ürün</th>
@@ -110,94 +124,113 @@
               <th>İşlem</th>
             </tr>
           </thead>
-          <tbody id="products-tbody"></tbody>
+          <tbody id="productTableBody"></tbody>
         </table>
+        <p id="productsEmpty" class="empty-state" style="display:none;">Ürün bulunamadı.</p>
       </div>
     </section>
 
-    <!-- ── SİPARİŞLER ── -->
-    <section id="section-orders" style="display:none">
-      <div class="admin-card">
-        <h3 class="admin-card-title">Siparişler</h3>
-        <table class="admin-table">
-          <thead><tr><th>Sipariş</th><th>Müşteri</th><th>Tutar</th><th>Durum</th><th>Tarih</th></tr></thead>
-          <tbody id="orders-tbody"></tbody>
+    <!-- SİPARİŞLER -->
+    <section id="view-orders" class="view">
+      <h1 class="page-title">Siparişler</h1>
+
+      <div class="table-container">
+        <div class="table-top-bar">
+          <h2 class="table-title">Tüm Siparişler</h2>
+          <div class="actions-bar">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="orderSearchInput" placeholder="Müşteri veya sipariş no ara...">
+            </div>
+          </div>
+        </div>
+
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Sipariş No</th>
+              <th>Müşteri</th>
+              <th>E-posta</th>
+              <th>Tutar</th>
+              <th>Durum</th>
+              <th>Tarih</th>
+            </tr>
+          </thead>
+          <tbody id="orderTableBody"></tbody>
         </table>
+        <p id="ordersEmpty" class="empty-state" style="display:none;">Henüz sipariş yok.</p>
       </div>
     </section>
 
   </main>
 
-  <!-- ══════════════ MODAL ══════════════ -->
-  <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-    <div class="modal-box">
+  <div id="productModal" class="modal-overlay">
+    <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modal-title">Yeni Ürün Ekle</h3>
-        <button class="close-btn" onclick="closeModal()">✕</button>
+        <h3 id="modalTitle" class="modal-title">Yeni Ürün Ekle</h3>
+        <button type="button" id="btnCloseModal" class="btn-close-modal">&times;</button>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Ürün Adı *</label>
-        <input class="form-input" id="f-name" type="text" placeholder="Örn: Dekoratif Çiçek Vazo" />
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Fiyat (₺) *</label>
-          <input class="form-input" id="f-price" type="number" min="0" placeholder="150" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Stok *</label>
-          <input class="form-input" id="f-stock" type="number" min="0" max="1000000" step="1" placeholder="10" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Kategori *</label>
-          <input class="form-input" id="f-cat" type="text" placeholder="Dekor" />
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Açıklama</label>
-        <textarea class="form-input form-textarea" id="f-desc" placeholder="Ürün hakkında kısa açıklama..."></textarea>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Durum</label>
-          <select class="form-input" id="f-status">
-            <option value="active">Satışta</option>
-            <option value="out">Stok Yok</option>
-            <option value="draft">Taslak</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Yeni mi?</label>
-          <select class="form-input" id="f-new">
-            <option value="false">Hayır</option>
-            <option value="true">Evet</option>
-          </select>
-        </div>
-      </div>
-      <!-- Resim Yükleme -->
-      <div class="form-group">
-        <label class="form-label">Ürün Resmi <span style="font-weight:400;color:#aaa">(JPG / PNG / WEBP)</span></label>
-        <input type="file" id="f-image" accept="image/jpeg,image/png,image/webp" style="display:none" />
-        <div id="img-preview-wrap"></div>
-      </div>
+      <form id="productForm">
+        <input type="hidden" id="editProductId" value="">
+        <input type="hidden" id="pImageData" value="">
 
-      <div class="form-group">
-        <label class="form-label">Yedek Simge <span style="font-weight:400;color:#aaa">(resim yoksa gösterilir)</span></label>
-        <div class="emoji-grid" id="emoji-grid"></div>
-      </div>
+        <div class="form-group">
+          <label for="pName">Ürün Başlığı</label>
+          <input type="text" id="pName" placeholder="Örn: NFC Tag Keychains" required>
+        </div>
 
-      <div class="modal-actions">
-        <button class="btn btn-ghost" onclick="closeModal()">İptal</button>
-        <button class="btn btn-primary" onclick="saveProduct()">Kaydet</button>
-      </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pCategory">Kategori</label>
+            <input type="text" id="pCategory" placeholder="Örn: Elektronik" required>
+          </div>
+          <div class="form-group">
+            <label for="pPrice">Fiyat (₺)</label>
+            <input type="number" id="pPrice" placeholder="350" required min="0" step="0.01">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pStock">Stok Adedi</label>
+            <input type="number" id="pStock" value="1" required min="0">
+          </div>
+          <div class="form-group">
+            <label for="pStatus">Durum</label>
+            <select id="pStatus">
+              <option value="active">Satışta</option>
+              <option value="out">Stokta Yok</option>
+              <option value="draft">Taslak</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pImageFile">Ürün Görseli</label>
+          <div class="image-upload-row">
+            <img id="pImagePreview" class="product-thumb image-preview" alt="Önizleme">
+            <label class="btn-upload" for="pImageFile">
+              <i class="fa-solid fa-upload"></i> Fotoğraf Yükle
+              <input type="file" id="pImageFile" accept="image/*" hidden>
+            </label>
+          </div>
+          <p id="imageUploadStatus" class="upload-status"></p>
+        </div>
+
+        <p id="formError" class="form-error"></p>
+
+        <div class="modal-footer">
+          <button type="button" id="btnCancelModal" class="btn-cancel">İptal</button>
+          <button type="submit" id="btnSubmitProduct" class="btn-submit">Kaydet</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- TOAST -->
-  <div class="toast" id="toast"></div>
-
-  <script src="js/products.js?v=5"></script>
-  <script src="js/admin.js?v=7"></script>
+  <script src="js/api-config.js?v=3"></script>
+  <script src="js/admin-guard.js?v=1"></script>
+  <script src="js/products.js?v=3"></script>
+  <script src="js/admin.js?v=2"></script>
 </body>
 </html>
