@@ -1,5 +1,7 @@
 'use strict';
 
+(() => {
+
 const state = {
   products: [],
   orders: [],
@@ -249,32 +251,39 @@ async function loadOrders() {
       credentials: 'include'
     });
 
-    if (!response.ok) {
-      state.orders = [];
-      return;
-    }
+    if (!response.ok) throw new Error('Siparişler yüklenemedi.');
 
     const data = await response.json();
     state.orders = Array.isArray(data) ? data : (Array.isArray(data.orders) ? data.orders : []);
   } catch (error) {
     console.error('Siparişler yüklenemedi:', error);
-    state.orders = [];
+    throw error;
   }
 }
 
 async function refreshAll() {
+  const errors = [];
+  byId('btnRefresh').disabled = true;
   try {
-    await fetchProducts();
+    await fetchProducts({ strict: true });
     state.products = getProducts();
   } catch (error) {
     console.error('Ürünler yüklenemedi:', error);
-    state.products = [];
+    errors.push('Ürünler yüklenemedi.');
   }
 
-  await loadOrders();
+  try {
+    await loadOrders();
+  } catch {
+    errors.push('Siparişler yüklenemedi.');
+  }
   renderProducts(byId('searchInput')?.value || '');
   renderOrders();
   renderDashboard();
+  byId('loadError').textContent = errors.length
+    ? `${errors.join(' ')} Görünen veriler güncel olmayabilir. Yenile düğmesiyle tekrar deneyin.`
+    : '';
+  byId('btnRefresh').disabled = false;
 }
 
 function resetForm() {
@@ -378,7 +387,7 @@ async function submitProduct(event) {
     image: state.imageData || null,
     emoji: existing?.emoji || '📦',
     desc: existing?.desc || '',
-    isNew: existing?.isNew || false
+    isNew: Boolean(existing?.isNew)
   };
 
   const submitButton = byId('btnSubmitProduct');
@@ -428,6 +437,7 @@ async function removeProduct(id) {
 }
 
 function bindEvents() {
+  byId('btnRefresh')?.addEventListener('click', refreshAll);
   document.querySelectorAll('.nav-item').forEach((button) => {
     button.addEventListener('click', () => setView(button.dataset.view));
   });
@@ -469,3 +479,4 @@ async function boot() {
 }
 
 document.addEventListener('DOMContentLoaded', boot);
+})();

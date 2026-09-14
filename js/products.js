@@ -12,17 +12,21 @@ let productsCache = [];
 
 /* Sunucudan ürünleri çeker ve cache'i günceller.
    Sayfa yüklenirken bir kez, admin panelde her ekle/güncelle/sil sonrası çağrılır. */
-async function fetchProducts() {
+async function fetchProducts({ strict = false } = {}) {
   try {
     const adminPage = /(?:^|\/)admin\.html$/.test(window.location.pathname);
     const res = await fetch(`${API_BASE}${adminPage ? '/api/admin/products' : '/api/products'}`, {
-      credentials: adminPage ? 'include' : 'omit'
+      credentials: adminPage ? 'include' : 'omit',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error('Sunucu hatası: ' + res.status);
     const data = await res.json();
-    productsCache = Array.isArray(data) ? data : (data.products || []);
+    const products = Array.isArray(data) ? data : data.products;
+    if (!Array.isArray(products)) throw new Error('Geçersiz ürün yanıtı.');
+    productsCache = products;
   } catch (err) {
     console.error('Ürünler sunucudan yüklenemedi:', err);
+    if (strict) throw err;
     productsCache = [];
   }
   return productsCache;
