@@ -342,6 +342,7 @@ async function handleImageChange(event) {
   if (!file) return;
 
   byId('imageUploadStatus').textContent = 'Görsel hazırlanıyor...';
+  byId('btnSubmitProduct').disabled = true;
 
   try {
     state.imageData = await fileToBase64(file);
@@ -352,11 +353,9 @@ async function handleImageChange(event) {
   } catch (error) {
     console.error(error);
     event.target.value = '';
-    state.imageData = '';
-    byId('pImageData').value = '';
-    byId('pImagePreview').removeAttribute('src');
-    byId('pImagePreview').classList.remove('visible');
-    byId('imageUploadStatus').textContent = 'Görsel işlenemedi.';
+    byId('imageUploadStatus').textContent = error.message || 'Görsel işlenemedi.';
+  } finally {
+    byId('btnSubmitProduct').disabled = false;
   }
 }
 

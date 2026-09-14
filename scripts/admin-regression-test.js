@@ -97,6 +97,42 @@ async function main() {
   assert.equal(el('loadError').textContent, '');
   const reads = requests.filter(request => request.url.endsWith('/products') && !request.options.method);
   assert.ok(reads.every(request => request.url.endsWith('/api/admin/products') && request.options.credentials === 'include'));
+  const encoded = 'data:image/jpeg;base64,/9j/';
+  context.FileReader = class {
+    readAsDataURL(file) {
+      if (file.unreadable) { this.onerror(); return; }
+      this.result = encoded;
+      this.onload();
+    }
+  };
+  context.Image = class {
+    width = 1600;
+    height = 1200;
+    set src(value) {
+      assert.ok(value.startsWith('data:image/'), 'Image decoding must comply with the data: CSP');
+      this.onload();
+    }
+  };
+  const originalCreate = context.document.createElement;
+  context.document.createElement = tag => tag === 'canvas' ? {
+    getContext: () => ({ fillRect() {}, drawImage() {} }),
+    toDataURL: () => encoded
+  } : originalCreate(tag);
+  for (const type of ['image/jpeg', 'image/png', 'image/webp']) {
+    context.testFile = { type, size: 1024 };
+    assert.equal(await vm.runInContext('fileToBase64(testFile)', context), encoded);
+  }
+  for (const file of [{ type: 'image/heic', size: 10 }, { type: 'image/png', size: 51 * 1024 * 1024 }, { type: 'image/png', size: 0 }, { type: 'image/png', size: 10, unreadable: true }]) {
+    context.testFile = file;
+    await assert.rejects(vm.runInContext('fileToBase64(testFile)', context));
+  }
+  await el('pImageFile').listeners.change({ target: { files: [{ type: 'image/png', size: 1024 }] } });
+  assert.equal(el('pImageData').value, encoded);
+  await el('pImageFile').listeners.change({ target: { files: [{ type: 'image/heic', size: 1024 }] } });
+  assert.equal(el('pImageData').value, encoded, 'Failed replacements must preserve the previous image');
+  assert.match(el('imageUploadStatus').textContent, /JPEG, PNG veya WebP/);
+  assert.equal(el('btnSubmitProduct').disabled, false);
+  console.log('Image checks passed: CSP-compatible decoding, format/size validation and failed replacement preservation.');
   console.log('Admin regression checks passed: startup, edit, create, delete, refresh and error recovery.');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
