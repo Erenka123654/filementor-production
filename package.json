@@ -16,11 +16,12 @@
     "db:local": "wrangler d1 migrations apply filementor-db --local",
     "db:remote": "wrangler d1 migrations apply filementor-db --remote",
     "audit": "npm audit --omit=dev",
-    "check": "node --check src/worker.js && node --check js/products.js && node --check js/store.js && node --check js/filementor-ai.js && node --check js/admin.js && node --check js/admin-guard.js && node --check js/payment.js && node --check js/login.js && node --check js/register.js && node --check js/cookie-consent.js && node scripts/security-check.js && node scripts/admin-regression-test.js",
-    "types": "wrangler types ./src/worker-configuration.d.ts"
+    "check": "node --check src/worker.js && node --check js/products.js && node --check js/store.js && node --check js/filementor-ai.js && node --check js/admin.js && node --check js/admin-guard.js && node --check js/payment.js && node --check js/login.js && node --check js/register.js && node --check js/cookie-consent.js && node scripts/security-check.js && node scripts/admin-regression-test.js && node --check src/quotes.js && node --check js/sales.js && node --check js/quotes-admin.js && node scripts/sales-test.js",
+    "types": "wrangler types ./src/worker-configuration.d.ts",
+    "catalog:sync": "node scripts/sync-catalog.js"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
-    "wrangler": "^4.110.0"
+    "wrangler": "4.143.0"
   }
 }

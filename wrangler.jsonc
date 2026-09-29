@@ -38,6 +38,9 @@
     }
   ],
 
+  "r2_buckets": [
+    { "binding": "QUOTE_FILES", "bucket_name": "filementor-quotes" }
+  ],
   "routes": [
     {
       "pattern": "api.filementorstudio.net",

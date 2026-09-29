@@ -16,3 +16,6 @@
 
 /register.html
   Cache-Control: no-store
+
+/teklifler.html
+  Cache-Control: no-store
