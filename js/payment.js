@@ -18,10 +18,11 @@ function closeCheckout() {
 }
 
 function validCheckoutDetails() {
-  const required = ['pay-name', 'pay-surname', 'pay-email', 'pay-phone', 'pay-identity', 'pay-address', 'pay-district', 'pay-city', 'pay-zip'];
+  const required = ['pay-name', 'pay-surname', 'pay-email', 'pay-phone', 'pay-address', 'pay-district', 'pay-city', 'pay-zip'];
+  if (window.FILEMENTOR_IDENTITY_REQUIRED !== false) required.push('pay-identity');
   if (required.some(id => !checkoutValue(id))) return false;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(checkoutValue('pay-email'))) return false;
-  if (!/^\d{11}$/.test(checkoutValue('pay-identity'))) return false;
+  if ((window.FILEMENTOR_IDENTITY_REQUIRED !== false || checkoutValue('pay-identity')) && !/^\d{11}$/.test(checkoutValue('pay-identity'))) return false;
   return /^\d{5}$/.test(checkoutValue('pay-zip'));
 }
 

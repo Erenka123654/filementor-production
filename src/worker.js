@@ -1,3 +1,5 @@
+import { submitQuote } from './quotes.js';
+
 const ALLOWED_ORIGINS = new Set([
   "https://filementorstudio.net",
   "https://www.filementorstudio.net",
@@ -273,7 +275,7 @@ async function readJsonBody(request) {
 
 async function enforceRateLimit(request, env, path) {
   const login = path === "/api/admin/login" || path === "/api/admin/register";
-  const contact = path === "/api/contact";
+  const contact = path === "/api/contact" || path === "/api/quotes";
   const aiChat = path === "/api/ai/chat";
   const windowSeconds = login || contact ? 900 : 60;
   const limit = login ? 5 : contact ? 5 : aiChat ? 12 : 60;
@@ -380,19 +382,20 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-function validateCheckout(body) {
+function validateCheckout(body, identityRequired = true) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return "Geçersiz ödeme isteği.";
   if (!Array.isArray(body.items) || body.items.length < 1 || body.items.length > 20) return "Sepet geçersiz.";
   for (const item of body.items) {
     if (!item || typeof item !== "object" || !/^[a-zA-Z0-9-]+$/.test(String(item.id || ""))) return "Sepette geçersiz ürün var.";
     if (!Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 20) return "Ürün adedi geçersiz.";
   }
-  const required = ["name", "surname", "email", "phone", "identityNumber", "address", "district", "city", "zipCode"];
+  const required = ["name", "surname", "email", "phone", "address", "district", "city", "zipCode"];
+  if (identityRequired) required.push('identityNumber');
   for (const field of required) {
     if (typeof body[field] !== "string" || body[field].trim().length < 2 || body[field].trim().length > 300) return "Teslimat bilgileri eksik veya geçersiz.";
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email) || body.email.length > 254) return "E-posta adresi geçersiz.";
-  if (!/^\d{11}$/.test(body.identityNumber)) return "T.C. kimlik numarası 11 haneli olmalıdır.";
+  if ((identityRequired || body.identityNumber) && !/^\d{11}$/.test(body.identityNumber)) return "T.C. kimlik numarası 11 haneli olmalıdır.";
   if (!/^\+?[0-9 ()-]{10,20}$/.test(body.phone)) return "Telefon numarası geçersiz.";
   if (!/^[0-9]{5}$/.test(body.zipCode)) return "Posta kodu 5 haneli olmalıdır.";
   return null;
@@ -584,9 +587,37 @@ export default {
         return response;
       }
 
+      if (path === '/api/store-settings' && request.method === 'GET') {
+        return jsonResponse(request, { identityRequired: env.IYZICO_IDENTITY_OPTIONAL_APPROVED !== 'true' });
+      }
+      if (path === '/api/quotes' && request.method === 'POST') {
+        if (!isAllowedOrigin(request)) return jsonResponse(request, { error: 'İstek kaynağı reddedildi.' }, 403);
+        return jsonResponse(request, await submitQuote(request, env), 201);
+      }
+      if (path === '/api/admin/quotes' && request.method === 'GET') {
+        if (!await isAuthorized(request, env)) return jsonResponse(request, { error: 'Yetkisiz işlem.' }, 401);
+        const rows = await env.DB.prepare('SELECT id,name,email,phone,detail,quantity,file_name,status,created_at FROM quote_requests ORDER BY created_at DESC LIMIT 100').all();
+        return jsonResponse(request, { quotes: rows.results || [] });
+      }
+      const quoteMatch = path.match(/^\/api\/admin\/quotes\/([a-f0-9-]{36})(\/file)?$/);
+      if (quoteMatch && ['GET','PUT'].includes(request.method)) {
+        if (!await isAuthorized(request, env)) return jsonResponse(request, { error: 'Yetkisiz işlem.' }, 401);
+        if (request.method === 'PUT' && !quoteMatch[2]) {
+          const data = await readJsonBody(request);
+          if (!['new','reviewing','completed'].includes(data?.status)) return jsonResponse(request, { error: 'Geçersiz durum.' }, 400);
+          const result = await env.DB.prepare('UPDATE quote_requests SET status=? WHERE id=?').bind(data.status,quoteMatch[1]).run();
+          return jsonResponse(request, { ok: Boolean(result.meta?.changes) }, result.meta?.changes ? 200 : 404);
+        }
+        if (request.method === 'GET' && quoteMatch[2]) {
+          const quote = await env.DB.prepare('SELECT file_key,file_name FROM quote_requests WHERE id=?').bind(quoteMatch[1]).first();
+          const object = quote?.file_key && env.QUOTE_FILES ? await env.QUOTE_FILES.get(quote.file_key) : null;
+          if (!object) return jsonResponse(request, { error: 'Dosya bulunamadı.' }, 404);
+          return new Response(object.body, { headers: { ...SECURITY_HEADERS, ...getCorsHeaders(request), 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${quote.file_name.replace(/[^a-zA-Z0-9._-]/g,'_')}"`, 'Cache-Control':'no-store' } });
+        }
+      }
       if (path === "/api/checkout" && request.method === "POST") {
         const checkout = await readJsonBody(request);
-        const validationError = validateCheckout(checkout);
+        const validationError = validateCheckout(checkout, env.IYZICO_IDENTITY_OPTIONAL_APPROVED !== 'true');
         if (validationError) return jsonResponse(request, { error: validationError }, 400);
 
         const quantities = new Map();
@@ -644,7 +675,7 @@ export default {
             id: orderId,
             name: checkout.name.trim(),
             surname: checkout.surname.trim(),
-            identityNumber: checkout.identityNumber,
+            ...(checkout.identityNumber ? { identityNumber: checkout.identityNumber } : {}),
             email: checkout.email.trim(),
             gsmNumber: checkout.phone.trim(),
             registrationAddress: checkout.address.trim(),

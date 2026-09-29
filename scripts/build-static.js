@@ -6,7 +6,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const output = path.join(root, 'dist');
 const files = [
-  'index.html', 'login.html', 'register.html', 'admin.html',
+  'index.html', 'login.html', 'register.html', 'admin.html', 'teklifler.html', 'urun.html',
   'kvkk.html', 'mesafeli-satis-sozlesmesi.html', 'iade-ve-cayma-hakki.html', 'cerez-politikasi.html',
   'CNAME', '_headers',
 ];
@@ -20,3 +20,4 @@ for (const directory of directories) {
 }
 
 console.log('Static frontend built in dist/.');
+require('./seo-build.js').buildSeo(root, output);

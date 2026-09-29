@@ -5,7 +5,8 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const sourceFiles = [
-  'index.html', 'login.html', 'admin.html',
+  'index.html', 'login.html', 'admin.html', 'teklifler.html', 'urun.html',
+  'js/sales.js', 'js/quotes-admin.js', 'js/product-detail.js', 'src/quotes.js',
   'js/api-config.js', 'js/products.js', 'js/store.js',
   'js/admin.js', 'js/admin-guard.js', 'js/payment.js', 'src/worker.js',
 ];
@@ -15,7 +16,7 @@ const forbidden = [
   { pattern: /document\.write\s*\(/, message: 'document.write call' },
 ];
 const noInlineStyleFiles = [
-  'index.html', 'login.html', 'register.html', 'admin.html',
+  'index.html', 'login.html', 'register.html', 'admin.html', 'teklifler.html', 'urun.html',
   'kvkk.html', 'cerez-politikasi.html', 'iade-ve-cayma-hakki.html', 'mesafeli-satis-sozlesmesi.html',
 ];
 const failures = [];
