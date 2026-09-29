@@ -48,7 +48,12 @@ function renderGrid() {
     const footer = storeNode('div', 'product-footer'); footer.append(storeNode('span', 'product-price', money(product.price)));
     if (product.status !== 'out') { const add = storeNode('button', 'add-cart-btn', '+'); add.type = 'button'; add.setAttribute('aria-label', 'Sepete ekle'); add.addEventListener('click', event => { event.stopPropagation(); addToCart(product.id); }); footer.append(add); }
     else footer.append(storeNode('span', '', '—'));
-    info.append(footer); card.append(imageBox, info); return card;
+    info.append(footer);
+    info.append(storeNode('div', 'stock-note', product.status === 'out' || Number(product.stock) <= 0 ? 'Stokta yok' : 'Stokta · Teslimat süresini sorabilirsiniz'));
+    const detailLink = storeNode('a', 'product-page-link', 'Ürün detaylarını incele');
+    detailLink.href = window.FILEMENTOR_SEO_IDS?.includes(String(product.id)) ? `/urunler/${encodeURIComponent(String(product.id))}.html` : `/urun.html?id=${encodeURIComponent(String(product.id))}`;
+    detailLink.addEventListener('click', event => event.stopPropagation());
+    info.append(detailLink); card.append(imageBox, info); return card;
   }));
 }
 
@@ -144,5 +149,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('lightbox-close-btn')?.addEventListener('click', closeLightbox);
   document.getElementById('lightbox-inner')?.addEventListener('click', event => event.stopPropagation());
   document.getElementById('lb-btn')?.addEventListener('click', addFromLightbox);
-  document.getElementById('contact-form')?.addEventListener('submit', handleContact);
+  // The file-enabled quote form is handled by sales.js independently of catalog loading.
 });

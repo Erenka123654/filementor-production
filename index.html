@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Filementor Studio — 3D Baskı Mağazası</title>
   <meta name="description" content="Filementor Studio — özel tasarım 3D baskı ürünleri, filament ve baskı hizmetleri. Türkiye geneline hızlı ve güvenli teslimat." />
+  <link rel="stylesheet" href="css/sales.css?v=1" />
   <link rel="canonical" href="https://filementorstudio.net/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Filementor Studio" />
@@ -52,11 +53,11 @@
           <a href="#iletisim" class="btn btn-ghost">Özel Sipariş</a>
         </div>
         <div class="hero-stats">
-          <div class="stat"><span class="stat-n">150+</span><span class="stat-l">ÜRÜN</span></div>
+          <div class="stat"><span class="stat-n">3D</span><span class="stat-l">ÖZEL ÜRETİM</span></div>
           <div class="stat-div"></div>
-          <div class="stat"><span class="stat-n">500+</span><span class="stat-l">MUTLU MÜŞTERİ</span></div>
+          <div class="stat"><span class="stat-n">STL</span><span class="stat-l">DOSYADAN BASKI</span></div>
           <div class="stat-div"></div>
-          <div class="stat"><span class="stat-n">2 GÜN</span><span class="stat-l">TESLİMAT</span></div>
+          <div class="stat"><span class="stat-n">SANA ÖZEL</span><span class="stat-l">TASARIM</span></div>
         </div>
       </div>
 
@@ -161,7 +162,16 @@
           <label class="form-label">Sipariş Detayı</label>
           <textarea class="form-input form-textarea" name="detail" minlength="10" maxlength="2000" placeholder="Ürün hakkında detay verin... (en az 10 karakter)" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Gönder</button>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label" for="quote-phone">Telefon</label><input class="form-input" id="quote-phone" name="phone" type="tel" autocomplete="tel" maxlength="24" required /></div>
+          <div class="form-group"><label class="form-label" for="quote-quantity">Adet</label><input class="form-input" id="quote-quantity" name="quantity" type="number" min="1" max="10000" value="1" required /></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="quote-file">STL veya referans fotoğrafı (isteğe bağlı)</label><input class="form-input" id="quote-file" name="file" type="file" accept=".stl,.png,.jpg,.jpeg,.webp" /><p class="quote-note">En fazla 5 MB. STL, PNG, JPEG veya WebP. Dosyanızı yalnızca talebinizi değerlendirmek için kullanırız. Hasta bilgisi, kimlik belgesi veya hassas veri yüklemeyin.</p></div>
+        <label class="quote-note"><input type="checkbox" name="privacy" value="accepted" required /> <a href="kvkk.html" target="_blank" rel="noopener">KVKK aydınlatma metnini</a> okudum. Bu form pazarlama aboneliği oluşturmaz.</label>
+        <div class="quote-honeypot" aria-hidden="true"><label>Web sitesi<input name="website" tabindex="-1" autocomplete="off" /></label></div>
+        <button type="submit" class="btn btn-primary">Teklif talebi gönder</button>
+        <p class="quote-note">Fiyat ve üretim süresi, dosyanız ve malzeme tercihiniz incelendikten sonra bildirilir.</p>
+        <p id="quote-result" class="quote-result" role="status" aria-live="polite"></p>
       </form>
     </div>
   </section>
@@ -234,6 +244,7 @@
 
     <!-- Adım 1: Kişisel Bilgiler -->
     <div class="pay-step" id="step-1">
+      <p class="guest-note">Üyelik gerekmez. Misafir olarak güvenli ödeme yapabilirsiniz.</p>
       <div class="step-indicator">
         <span class="step active">1</span><span class="step-line"></span>
         <span class="step">2</span><span class="step-line"></span>
@@ -261,6 +272,7 @@
       <div class="form-group">
         <label class="form-label">T.C. Kimlik Numarası *</label>
         <input class="form-input" id="pay-identity" type="text" inputmode="numeric" minlength="11" maxlength="11" autocomplete="off" placeholder="11 haneli" />
+        <p class="quote-note">Mevcut iyzico ödeme entegrasyonu için gereklidir. Kimlik numaranız sipariş veritabanımıza kaydedilmez.</p>
         <small class="form-hint">Yalnızca ödeme sağlayıcısına iletilir, Filementor veritabanında saklanmaz.</small>
       </div>
       <div class="form-group">
@@ -384,8 +396,10 @@
 
   <script src="js/api-config.js?v=3"></script>
   <script src="js/products.js?v=3"></script>
-  <script src="js/store.js?v=5"></script>
-  <script src="js/payment.js?v=4"></script>
+  <script src="js/catalog-pages.js?v=1"></script>
+  <script src="js/store.js?v=6"></script>
+  <script src="js/payment.js?v=5"></script>
+  <script src="js/sales.js?v=1"></script>
   <script src="js/filementor-ai.js?v=1"></script>
 </body>
 </html>

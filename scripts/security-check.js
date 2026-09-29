@@ -5,7 +5,8 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const sourceFiles = [
-  'index.html', 'login.html', 'admin.html',
+  'index.html', 'login.html', 'admin.html', 'teklifler.html', 'urun.html',
+  'js/sales.js', 'js/quotes-admin.js', 'js/product-detail.js', 'src/quotes.js',
   'js/api-config.js', 'js/products.js', 'js/store.js',
   'js/admin.js', 'js/admin-guard.js', 'js/payment.js', 'src/worker.js',
 ];
@@ -15,7 +16,7 @@ const forbidden = [
   { pattern: /document\.write\s*\(/, message: 'document.write call' },
 ];
 const noInlineStyleFiles = [
-  'index.html', 'login.html', 'register.html', 'admin.html',
+  'index.html', 'login.html', 'register.html', 'admin.html', 'teklifler.html', 'urun.html',
   'kvkk.html', 'cerez-politikasi.html', 'iade-ve-cayma-hakki.html', 'mesafeli-satis-sozlesmesi.html',
 ];
 const failures = [];
@@ -42,6 +43,16 @@ if (/id="card-(?:num|holder|exp|cvv)"/.test(index)) {
 const worker = fs.readFileSync(path.join(root, 'src/worker.js'), 'utf8');
 if (/Access-Control-Allow-Origin[\s\S]{0,80}["']\*["']/.test(worker)) {
   failures.push('src/worker.js: wildcard production CORS');
+}
+const productionOrigins = worker.match(/const ALLOWED_ORIGINS = new Set\(\[([\s\S]*?)\]\);/)?.[1] || '';
+if (/localhost|127\.0\.0\.1/.test(productionOrigins)) {
+  failures.push('src/worker.js: local origin included in the production CORS allowlist');
+}
+if (/searchParams\.set\(["']order["']/.test(worker)) {
+  failures.push('src/worker.js: order identifier exposed in a redirect URL');
+}
+if (!/Strict-Transport-Security/.test(worker)) {
+  failures.push('src/worker.js: HSTS response header missing');
 }
 
 if (failures.length) {

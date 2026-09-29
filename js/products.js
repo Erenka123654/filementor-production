@@ -12,17 +12,21 @@ let productsCache = [];
 
 /* Sunucudan ürünleri çeker ve cache'i günceller.
    Sayfa yüklenirken bir kez, admin panelde her ekle/güncelle/sil sonrası çağrılır. */
-async function fetchProducts() {
+async function fetchProducts({ strict = false } = {}) {
   try {
     const adminPage = /(?:^|\/)admin\.html$/.test(window.location.pathname);
     const res = await fetch(`${API_BASE}${adminPage ? '/api/admin/products' : '/api/products'}`, {
-      credentials: adminPage ? 'include' : 'omit'
+      credentials: adminPage ? 'include' : 'omit',
+      cache: 'no-store'
     });
     if (!res.ok) throw new Error('Sunucu hatası: ' + res.status);
     const data = await res.json();
-    productsCache = Array.isArray(data) ? data : (data.products || []);
+    const products = Array.isArray(data) ? data : data.products;
+    if (!Array.isArray(products)) throw new Error('Geçersiz ürün yanıtı.');
+    productsCache = products;
   } catch (err) {
     console.error('Ürünler sunucudan yüklenemedi:', err);
+    if (strict) throw err;
     productsCache = [];
   }
   return productsCache;
@@ -71,9 +75,17 @@ async function deleteProductOnServer(id) {
 /* 50 MB'a kadar kaynak görseli D1 için güvenli boyuta küçültür ve sıkıştırır. */
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
-    const objectUrl = URL.createObjectURL(file);
+    if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      reject(new Error('Lütfen JPEG, PNG veya WebP biçiminde bir görsel seçin.'));
+      return;
+    }
+    if (!file.size || file.size > 50 * 1024 * 1024) {
+      reject(new Error('Görsel boş olmamalı ve 50 MB sınırını aşmamalı.'));
+      return;
+    }
+    const reader = new FileReader();
     const img = new Image();
-    img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error('Görsel açılamadı.')); };
+    img.onerror = () => reject(new Error('Görsel açılamadı. Geçerli bir JPEG, PNG veya WebP dosyası seçin.'));
     img.onload = () => {
       try {
         let maxDimension = 1200;
@@ -96,8 +108,11 @@ function fileToBase64(file) {
         }
         reject(new Error('Görsel güvenli boyuta indirilemedi.'));
       } catch (error) { reject(error); }
-      finally { URL.revokeObjectURL(objectUrl); }
     };
-    img.src = objectUrl;
+    reader.onerror = () => reject(new Error('Dosya okunamadı. Lütfen yeniden seçin.'));
+    reader.onabort = () => reject(new Error('Dosya okuma iptal edildi.'));
+    // The site CSP permits data: images; blob: image URLs are blocked.
+    reader.onload = () => { img.src = reader.result; };
+    reader.readAsDataURL(file);
   });
 }

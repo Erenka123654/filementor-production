@@ -1,6 +1,6 @@
 .fm-chat-root {
   position: fixed;
-  right: 20px;
+  left: 20px;
   bottom: 20px;
   z-index: 9999;
   font-family: inherit;
@@ -19,7 +19,7 @@
 
 .fm-chat-panel {
   position: absolute;
-  right: 0;
+  left: 0;
   bottom: 60px;
   width: 320px;
   max-height: 440px;
