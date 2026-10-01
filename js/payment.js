@@ -48,7 +48,7 @@ function goStep(step) {
   if (step === 3) renderOrderSummary();
   ['step-1', 'step-2', 'step-3', 'step-success'].forEach(id => {
     const element = document.getElementById(id);
-    if (element) element.style.display = id === `step-${step}` ? '' : 'none';
+    if (element) element.classList.toggle('hidden', id !== `step-${step}`);
   });
 }
 

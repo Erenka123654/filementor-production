@@ -1,0 +1,66 @@
+diff --git a/_headers b/_headers
+index 1ab62d1..cfe44d8 100644
+--- a/_headers
++++ b/_headers
+@@ -1,20 +1,18 @@
+-# Cloudflare Pages icin guvenlik basliklari
+-# Bu dosyayi sitenin yayinlanan kok klasorune (index.html ile ayni yer) koy.
+-
+-/*
+-  Strict-Transport-Security: max-age=31536000; includeSubDomains
+-  X-Content-Type-Options: nosniff
+-  X-Frame-Options: SAMEORIGIN
++/*
++  X-Content-Type-Options: nosniff
++  X-Frame-Options: DENY
+   Referrer-Policy: strict-origin-when-cross-origin
+   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
++  Strict-Transport-Security: max-age=31536000; includeSubDomains
+   Cross-Origin-Opener-Policy: same-origin
+-  # Pages'in varsayilan "Access-Control-Allow-Origin: *" basligini kaldirir
+-  ! Access-Control-Allow-Origin
+-  # CSP: kullandigin harici kaynaklara gore duzenle (asagidaki ornekte Google Fonts ve cdnjs/jsdelivr var)
+-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests
+-
+-# Hassas/kisisel sayfalar onbellege alinmasin (yollari kendine gore degistir)
+-/admin/*
+-  Cache-Control: no-store
+-/hesabim/*
+-  Cache-Control: no-store
++  X-Permitted-Cross-Domain-Policies: none
++  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.filementorstudio.net https://cloudflareinsights.com
++
++/admin.html
++  Cache-Control: no-store
++
++/login.html
++  Cache-Control: no-store
++
++/register.html
++  Cache-Control: no-store
+diff --git a/index.html b/index.html
+index 70e04db..b236362 100644
+--- a/index.html
++++ b/index.html
+@@ -386,7 +386,7 @@
+   <script src="js/api-config.js?v=3"></script>
+   <script src="js/products.js?v=3"></script>
+   <script src="js/store.js?v=5"></script>
+-  <script src="js/payment.js?v=4"></script>
++  <script src="js/payment.js?v=5"></script>
+   <script src="js/filementor-ai.js?v=1"></script>
+ <script src="js/animations.js?v=1"></script>
+ </body>
+diff --git a/js/payment.js b/js/payment.js
+index e3de518..cfcefe3 100644
+--- a/js/payment.js
++++ b/js/payment.js
+@@ -48,7 +48,7 @@ function goStep(step) {
+   if (step === 3) renderOrderSummary();
+   ['step-1', 'step-2', 'step-3', 'step-success'].forEach(id => {
+     const element = document.getElementById(id);
+-    if (element) element.style.display = id === `step-${step}` ? '' : 'none';
++    if (element) element.classList.toggle('hidden', id !== `step-${step}`);
+   });
+ }
+ 
