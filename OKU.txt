@@ -1,0 +1,24 @@
+KURULUM
+
+A) Cloudflare Pages kullaniyorsan:
+ 1. "_headers" dosyasini sitenin yayinlanan kok klasorune kopyala (index.html ile ayni yer).
+ 2. Projeyi tekrar deploy et.
+ 3. Test: tarayicida F12 > Network > sayfayi sec > Response Headers.
+
+B) Cloudflare Worker (FastAPI/API dahil) kullaniyorsan:
+ 1. "worker-guvenlik.js" icindeki IZINLI_ORIGINLER listesine kendi alan adlarini yaz.
+ 2. Kendi Worker kodunun cikisini bu sekilde sar ya da dosyadaki mantigi ekle.
+ 3. "wrangler deploy" ile yayinla.
+
+C) Sadece panelden yapmak istersen:
+ Cloudflare > Rules > Transform Rules > Modify Response Header
+ ile ayni basliklari ekleyebilirsin.
+
+CSP NOTU
+ - Sayfa bozulursa F12 > Console'da engellenen kaynagi gorursun; o alan adini CSP'ye ekle.
+ - Once "Content-Security-Policy-Report-Only" olarak denemek istersen basligin adini degistir.
+ - Ileride inline script/style'lari dosyaya tasiyip 'unsafe-inline' ifadesini kaldir.
+
+TEKRAR TARAMA
+ Degisiklikten sonra ZAP taramasini tekrar calistir; CSP, HSTS, nosniff, CORS uyarilari azalmali.
+ SRI uyarisi icin harici <script>/<link> etiketlerine integrity="sha384-..." ve crossorigin="anonymous" ekle.
