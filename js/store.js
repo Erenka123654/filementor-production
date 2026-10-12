@@ -106,30 +106,40 @@ function updateCartUI() {
 }
 
 function toggleCart() { const drawer = document.getElementById('cart-drawer'); const overlay = document.getElementById('cart-overlay'); const open = drawer.classList.toggle('open'); overlay.classList.toggle('open', open); document.body.style.overflow = open ? 'hidden' : ''; }
-async function handleContact(event) {
+function handleContact(event) {
   event.preventDefault();
   const form = event.currentTarget;
   const button = form.querySelector('button[type="submit"]');
   const name = form.elements.namedItem('name')?.value.trim() || '';
   const email = form.elements.namedItem('email')?.value.trim() || '';
   const detail = form.elements.namedItem('detail')?.value.trim() || '';
+  const whatsappNumber = String(window.FILEMENTOR_WHATSAPP_NUMBER || '').replace(/\D/g, '');
+
+  if (!whatsappNumber) {
+    showToast('WhatsApp iletişim numarası yapılandırılmamış.');
+    return;
+  }
 
   if (button) { button.disabled = true; button.textContent = 'Gönderiliyor...'; }
-  try {
-    const response = await fetch(`${window.FILEMENTOR_API_BASE}/api/contact`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, detail }),
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || 'Mesaj gönderilemedi.');
+  const message = [
+    'Merhaba Filementor Studio, özel sipariş talebim var.',
+    '',
+    `Ad Soyad: ${name}`,
+    `E-posta: ${email}`,
+    '',
+    'Sipariş detayı:',
+    detail,
+  ].join('\n');
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+  const whatsappWindow = window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+
+  // Tarayıcı yeni sekmeyi engellerse aynı sekmede devam et.
+  if (!whatsappWindow) window.location.assign(whatsappUrl);
+  else {
     form.reset();
-    showToast('Mesajınız gönderildi. En kısa sürede dönüş yapacağız.');
-  } catch (error) {
-    showToast(error instanceof Error ? error.message : 'Mesaj gönderilemedi. Lütfen tekrar deneyin.');
-  } finally {
-    if (button) { button.disabled = false; button.textContent = 'Gönder'; }
+    showToast('WhatsApp mesajı hazırlandı. Göndermek için WhatsApp ekranındaki Gönder düğmesine basın.');
   }
+  if (button) { button.disabled = false; button.textContent = 'Gönder'; }
 }
 let toastTimer;
 function showToast(message) { const element = document.getElementById('toast'); if (!element) return; element.textContent = message; element.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => element.classList.remove('show'), 2800); }
